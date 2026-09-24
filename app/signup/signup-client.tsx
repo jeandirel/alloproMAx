@@ -102,7 +102,7 @@ export function SignupClient() {
                   required
                   className="w-full pl-10 pr-10 py-2.5 bg-white rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-dark/20 focus:border-emerald-dark"
                 />
-                <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
@@ -110,7 +110,7 @@ export function SignupClient() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gold hover:bg-gold-dark disabled:opacity-60 text-white py-3 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-gold hover:bg-gold-dark disabled:opacity-60 text-slate-950 py-3 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               Créer mon compte

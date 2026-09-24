@@ -1,14 +1,40 @@
 export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { timingSafeEqual } from 'node:crypto'
 import { prisma } from '@/lib/prisma'
 import { refreshPayment } from '@/lib/payment-server'
 import { isFinal } from '@/lib/payment-types'
 const callback = z.object({depositId:z.string().uuid().optional(),payoutId:z.string().uuid().optional(),refundId:z.string().uuid().optional()})
 // Public provider endpoint: NEVER trust a supplied status, amount or identity.
 // Callbacks are hints only; every effect uses the authenticated pawaPay GET response.
+let warnedMissingCallbackSecret = false
+// Shared-secret callback authentication. NOTE: the exact header name/scheme below is a
+// defensible default (Bearer token), NOT pawaPay's documented production scheme — this repo
+// has no access to pawaPay's merchant dashboard callback-auth docs. Reconcile the header name
+// and format with whatever pawaPay's real dashboard actually sends before going to production.
+function verifyCallbackAuth(req: Request): boolean {
+  const secret = process.env.PAWAPAY_CALLBACK_SECRET
+  if (!secret) {
+    if (!warnedMissingCallbackSecret) { warnedMissingCallbackSecret = true; console.warn('PAWAPAY_CALLBACK_SECRET non configuré : les callbacks pawaPay sont acceptés sans vérification de signature (dev/sandbox uniquement).') }
+    return true
+  }
+  const header = req.headers.get('authorization') || ''
+  const provided = header.startsWith('Bearer ') ? header.slice(7) : ''
+  const expected = Buffer.from(secret)
+  const actual = Buffer.from(provided)
+  // Guard length mismatch before timingSafeEqual, which throws on unequal buffer lengths.
+  return actual.length === expected.length && timingSafeEqual(actual, expected)
+}
 export async function POST(req: Request) {
   const headers = {'Cache-Control':'no-store'}
+  if (!verifyCallbackAuth(req)) {
+    // Un rejet ici alors que PAWAPAY_CALLBACK_SECRET est configuré peut signifier que le schéma
+    // d'authentification supposé (Bearer) ne correspond pas à celui réellement utilisé par pawaPay
+    // en production — sans ce log, des callbacks légitimes rejetés passeraient totalement inaperçus.
+    console.error('Callback pawaPay rejeté : authentification invalide (vérifier le schéma attendu par pawaPay).')
+    return new NextResponse(null,{status:401,headers})
+  }
   try {
     if (Number(req.headers.get('content-length')||0)>16384) return new NextResponse(null,{status:413,headers})
     const raw = await req.text()

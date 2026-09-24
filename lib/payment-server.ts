@@ -16,7 +16,7 @@ async function saveWorkspace(tx: Tx, row: {id:string;version:number}, state: Wor
   const saved = await tx.demoWorkspace.updateMany({where:{id:row.id,version:row.version},data:{state:state as unknown as Prisma.InputJsonValue,version:{increment:1}}})
   if (!saved.count) throw new Error('Les données ont changé. Actualisez avant de réessayer.')
 }
-export async function preparePayment(userId: string, missionId: string, kind: PaymentKind, method?: 'airtel'|'moov', phone?: string) {
+export async function preparePayment(userId: string, missionId: string, kind: PaymentKind, method?: 'airtel'|'moov', phone?: string, refundAmount?: number) {
   const mode = paymentMode()
   // All network I/O is outside the database transaction.
   const options = await providerOptions(kind)
@@ -33,9 +33,14 @@ export async function preparePayment(userId: string, missionId: string, kind: Pa
     let selected = method || m.paymentMethod
     let number = kind === 'payout' ? state.pros.find(p=>p.id===m.professionalId)!.phone : phone || f.phone
     let depositId: string|null = null
+    if (refundAmount !== undefined) {
+      if (kind !== 'refund') throw new Error('Le montant de remboursement ne peut être précisé que pour une opération de remboursement.')
+      if (!Number.isSafeInteger(refundAmount) || refundAmount <= 0) throw new Error('Montant de remboursement invalide : il doit être un entier positif.')
+    }
     if (kind === 'refund') {
       const deposit = await tx.paymentTransaction.findFirst({where:{id:f.deposit!.id,userId,missionId,kind:'deposit',status:'COMPLETED',mode}})
       if (!deposit) throw new Error('Encaissement confirmé introuvable dans le journal financier.')
+      if (refundAmount !== undefined && refundAmount > deposit.amount) throw new Error('Le montant du remboursement dépasse l’encaissement d’origine.')
       selected = m.paymentMethod; number = deposit.phoneNumber; depositId = deposit.id
     } else if (kind === 'payout') {
       const deposit = await tx.paymentTransaction.findFirst({where:{id:f.deposit!.id,userId,missionId,kind:'deposit',status:'COMPLETED',mode}})
@@ -46,9 +51,16 @@ export async function preparePayment(userId: string, missionId: string, kind: Pa
     if (!option) throw new Error('Cet opérateur ou cette opération n’est pas activé dans votre configuration pawaPay au Gabon.')
     if (kind === 'payout' && !number) throw new Error('Renseignez le numéro Mobile Money du professionnel dans son dossier avant le versement.')
     number = normalizePhone(number)
-    const amount = kind === 'payout' ? m.basePrice : m.totalPrice
+    const amount = kind === 'payout' ? m.basePrice : kind === 'refund' && refundAmount !== undefined ? refundAmount : m.totalPrice
     if (!Number.isSafeInteger(amount) || amount <= 0 || amount < option.min || amount > option.max) throw new Error('Montant hors des limites autorisées par cet opérateur.')
     const transaction = await tx.paymentTransaction.create({data:{id:randomUUID(),userId,missionId,kind,attempt:(previous?.attempt||0)+1,mode,amount,provider:option.provider,phoneNumber:number,depositId}})
+    // Contrairement à PaymentTransaction/DemoWorkspace.userId, AuditLog.actorId a une contrainte de
+    // clé étrangère stricte vers User. Le JWT de session n'est jamais revérifié contre la table User
+    // (cf. auth.ts) ; si la ligne a été purgée entre-temps, un actorId invalide ferait échouer cette
+    // écriture avec une violation de clé étrangère et annulerait toute la transaction de paiement.
+    // On vérifie donc son existence ici plutôt que de faire confiance à l'identifiant du JWT.
+    const actorExists = await tx.user.findUnique({where:{id:userId},select:{id:true}})
+    await tx.auditLog.create({data:{actorId:actorExists?userId:null,actorRole:state.role,action:'payment.transaction.created',targetType:'PaymentTransaction',targetId:transaction.id,metadata:{kind,status:transaction.status,amount,previousStatus:null}}})
     if (kind === 'deposit') {f.deposit={id:transaction.id,status:'CREATED'};f.phone=number;m.paymentMethod=selected;m.payment='en_cours'}
     else {f.settlement={id:transaction.id,status:'CREATED',kind};m.payment=kind==='refund'?'a_rembourser':'a_verser'}
     m.events.push({at:new Date().toISOString(),text:`${mode==='mock'?'Simulation locale':'pawaPay sandbox'} · demande de ${kind==='deposit'?'paiement':kind==='refund'?'remboursement':'versement'} enregistrée`})
@@ -65,6 +77,9 @@ async function recordStatus(t: PaymentTransaction, status: TransactionStatus, fa
     if (!m) throw new Error('Mission introuvable pour le rapprochement.')
     applyPaymentStatus(state,m,t.id,t.kind as PaymentKind,status)
     const result = await tx.paymentTransaction.update({where:{id:t.id},data:{status,failureCode}})
+    // actorId is null: this transition can originate from an authenticated pawaPay webhook/reconciliation
+    // as well as a user-triggered refresh, and this function has no reliable caller-identity context.
+    await tx.auditLog.create({data:{actorId:null,actorRole:'system',action:'payment.transaction.status_changed',targetType:'PaymentTransaction',targetId:t.id,metadata:{kind:t.kind,status,amount:current.amount,previousStatus:current.status}}})
     await saveWorkspace(tx,row,state)
     return result
   },{maxWait:5000,timeout:10000})

@@ -2,9 +2,14 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
 
 export async function POST(req: Request) {
   try {
+    const ip = getClientIp(req)
+    if (!checkRateLimit(`signup:${ip}`, 10, 15 * 60000).allowed || !checkRateLimit('global:signup', 300, 15 * 60000).allowed) {
+      return NextResponse.json({ error: 'Trop de tentatives. Réessayez dans quelques minutes.' }, { status: 429 })
+    }
     const { email, password, name } = await req.json()
     if (!email || !password || !name) {
       return NextResponse.json({ error: 'Tous les champs sont requis' }, { status: 400 })

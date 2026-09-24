@@ -11,9 +11,9 @@ const point = z.object({ lat: z.number().min(-90).max(90), lng: z.number().min(-
 const rating = z.number().int().min(1).max(5)
 export const actionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('role'), role: z.enum(['client','professionnel','administrateur']), proId: id.optional() }),
-  z.object({ type: z.literal('profile'), name: text, email: z.union([z.string().email(),z.literal('')]), phone: z.string().max(30), address: z.string().max(300), quartier: text, photo: files, location: point.nullable(), role: z.enum(['client','professionnel']).optional() }),
+  z.object({ type: z.literal('profile'), name: text, email: z.union([z.string().email(),z.literal('')]), phone: z.string().max(30), address: z.string().max(300), quartier: text, provinceId: z.string().nullable().optional(), cityId: z.string().nullable().optional(), neighborhoodId: z.string().nullable().optional(), photo: files, location: point.nullable(), role: z.enum(['client','professionnel']).optional() }),
   z.object({ type: z.literal('favorite'), proId: id }),
-  z.object({ type: z.literal('book'), proId: id, service: text, description: text, address: text, quartier: text, accessNotes: z.string().max(2000), date: z.string(), urgent: z.boolean(), paymentMethod: z.enum(['airtel','moov']), phone: z.string().regex(/^(?:\+241|00241)?0?[67][0-9]{7}$/,'Numéro gabonais invalide'), photos: files, location: point.nullable(), requestKey: id }),
+  z.object({ type: z.literal('book'), proId: id, service: text, description: text, address: text, quartier: text, neighborhoodId: z.string().nullable().optional(), accessNotes: z.string().max(2000), date: z.string(), urgent: z.boolean(), paymentMethod: z.enum(['airtel','moov']), phone: z.string().regex(/^(?:\+241|00241)?0?[67][0-9]{7}$/,'Numéro gabonais invalide'), photos: files, location: point.nullable(), requestKey: id }),
   z.object({ type: z.literal('transition'), missionId: id, action: z.enum(['accept','refuse','route','start','finish','validate','cancel']), before: files.optional(), after: files.optional(), report: z.string().max(2000).optional() }),
   z.object({ type: z.literal('dispute'), missionId: id, reason: text, evidence: files }),
   z.object({ type: z.literal('resolve'), missionId: id, decision: z.enum(['refund','release']), reason: text }),
@@ -21,7 +21,7 @@ export const actionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('message'), thread: id, text }),
   z.object({ type: z.literal('read') }),
   z.object({ type: z.literal('availability'), available: z.boolean() }),
-  z.object({ type: z.literal('proProfile'), name: text, bio: text, zone: text, zones: z.array(text).min(1).max(10), categorie: text, experience: z.number().int().min(0).max(70), phone: z.string().max(30), services: z.array(z.object({ nom: text, tarif: z.number().int().min(1).max(10000000) })).min(1).max(20), documents: z.record(files), submit: z.boolean() }),
+  z.object({ type: z.literal('proProfile'), name: text, bio: text, zone: text, zones: z.array(text).min(1).max(10), categorie: text, experience: z.number().int().min(0).max(70), phone: z.string().max(30), services: z.array(z.object({ nom: text, tarif: z.number().int().min(1).max(10000000) })).min(1).max(20), documents: z.record(files), submit: z.boolean(), provinceId: z.string().nullable().optional(), cityId: z.string().nullable().optional(), neighborhoodId: z.string().nullable().optional(), neighborhoodIds: z.array(z.string()).max(20).optional(), serviceIds: z.array(z.string()).max(20).optional() }),
   z.object({ type: z.literal('kyc'), proId: id, approve: z.boolean(), reason: z.string().max(2000) }),
   z.object({ type: z.literal('settings'), commission: z.number().min(0).max(30), autoHours: z.number().int().min(1).max(720) }),
   z.object({ type: z.literal('category'), name: text, active: z.boolean() }),
@@ -49,7 +49,7 @@ export function applyAction(state: Workspace, input: unknown, now = new Date(), 
       if (a.proId) { if (!s.pros.some(p=>p.id===a.proId)) throw new Error('Professionnel introuvable.'); s.activeProId=a.proId }
       break
     case 'profile':
-      s.profile = { name:a.name,email:a.email,phone:a.phone,address:a.address,quartier:a.quartier,photo:a.photo,location:a.location }; s.onboarded=true
+      s.profile = { name:a.name,email:a.email,phone:a.phone,address:a.address,quartier:a.quartier,provinceId:a.provinceId ?? null,cityId:a.cityId ?? null,neighborhoodId:a.neighborhoodId ?? null,photo:a.photo,location:a.location }; s.onboarded=true
       if (a.role) { s.role=a.role; if (a.role === 'professionnel') { let p = s.pros.find(p=>p.id==='mon-profil'); if (!p) { p={...structuredClone(s.pros[0]), id:'mon-profil', name:a.name, photo:'', bio:'', verifie:false, enLigne:false, kyc:'brouillon', reason:'', documents:{}, missions:0,note:0,avis:[],galerie:[],phone:a.phone}; s.pros.push(p) }; s.activeProId=p.id } }
       break
     case 'favorite':
@@ -65,7 +65,7 @@ export function applyAction(state: Workspace, input: unknown, now = new Date(), 
       const service=p.services.find(v=>v.nom===a.service); if(!service) throw new Error('Service non proposé par ce professionnel.')
       const date=a.urgent?now:new Date(a.date); if(!Number.isFinite(date.getTime()) || (!a.urgent && date<=now)) throw new Error('Choisissez un créneau à venir.')
       const fee=Math.round(service.tarif*s.commission/100)
-      const m: Mission={id:`RES-${makeId().slice(0,8).toUpperCase()}`,professionalId:p.id,service:service.nom,description:a.description,address:a.address,quartier:a.quartier,accessNotes:a.accessNotes,date:date.toISOString(),urgent:a.urgent,status:'en_attente',basePrice:service.tarif,serviceFee:fee,totalPrice:service.tarif+fee,paymentMethod:a.paymentMethod,payment:'a_payer',paymentFlow:{mode:paymentMode,phone:a.phone,deposit:null,settlement:null,decision:null},location:a.location,photos:a.photos,before:[],after:[],report:'',deadline:null,events:[],dispute:null,review:null,requestKey:a.requestKey}
+      const m: Mission={id:`RES-${makeId().slice(0,8).toUpperCase()}`,professionalId:p.id,service:service.nom,description:a.description,address:a.address,quartier:a.quartier,neighborhoodId:a.neighborhoodId ?? null,accessNotes:a.accessNotes,date:date.toISOString(),urgent:a.urgent,status:'en_attente',basePrice:service.tarif,serviceFee:fee,totalPrice:service.tarif+fee,paymentMethod:a.paymentMethod,payment:'a_payer',paymentFlow:{mode:paymentMode,phone:a.phone,deposit:null,settlement:null,decision:null},location:a.location,photos:a.photos,before:[],after:[],report:'',deadline:null,events:[],dispute:null,review:null,requestKey:a.requestKey}
       s.missions.unshift(m); event(m,'Réservation enregistrée · paiement Mobile Money à effectuer'); return {state:s,result:m.id}
     }
     case 'transition': {
@@ -127,7 +127,7 @@ export function applyAction(state: Workspace, input: unknown, now = new Date(), 
       if(!s.categories.some(c=>c.active && c.name===a.categorie)) throw new Error('Choisissez une catégorie active.')
       if(a.submit && (!a.documents.recto?.length || !a.documents.verso?.length || !a.documents.casier?.length)) throw new Error('Pièce d’identité recto/verso et casier judiciaire obligatoires.')
       const identityChanged=p.name!==a.name || JSON.stringify(p.documents)!==JSON.stringify(a.documents) || p.categorie!==a.categorie
-      Object.assign(p,{name:a.name,bio:a.bio,zone:a.zone,zones:a.zones,categorie:a.categorie,metier:a.categorie,experience:a.experience,phone:a.phone,services:a.services,tarifMin:Math.min(...a.services.map(v=>v.tarif)),documents:a.documents})
+      Object.assign(p,{name:a.name,bio:a.bio,zone:a.zone,zones:a.zones,categorie:a.categorie,metier:a.categorie,experience:a.experience,phone:a.phone,services:a.services,tarifMin:Math.min(...a.services.map(v=>v.tarif)),documents:a.documents,provinceId:a.provinceId ?? null,cityId:a.cityId ?? null,neighborhoodId:a.neighborhoodId ?? null,neighborhoodIds:a.neighborhoodIds ?? p.neighborhoodIds ?? [],serviceIds:a.serviceIds ?? p.serviceIds ?? []})
       if(a.documents.portrait?.[0]) p.photo=`/api/files?id=${encodeURIComponent(a.documents.portrait[0].id)}&view=1`
       if(a.documents.realisations?.length) p.galerie=a.documents.realisations.map(f=>`/api/files?id=${encodeURIComponent(f.id)}&view=1`)
       if(a.submit || identityChanged) { p.kyc=a.submit?'en_cours':'brouillon'; p.verifie=false; p.enLigne=false; p.reason='' }

@@ -4,7 +4,8 @@ import type {Point} from '@/lib/marketplace'
 import {MapPin,LocateFixed} from 'lucide-react'
 import {toast} from 'sonner'
 export function ServiceMap({markers=[],position,onSelect,caption='Positions des professionnels approximatives, pour la démonstration.'}:{markers?:{id:string;name:string;point:Point;href?:string}[];position?:Point|null;onSelect?:(point:Point)=>void;caption?:string}){
- const [enabled,setEnabled]=useState(false);const [error,setError]=useState('');const element=useRef<HTMLDivElement>(null);const callback=useRef(onSelect);callback.current=onSelect
+ const [enabled,setEnabled]=useState(false);const [error,setError]=useState('');const element=useRef<HTMLDivElement>(null);const callback=useRef(onSelect)
+ useEffect(()=>{callback.current=onSelect},[onSelect])
  const signature=JSON.stringify({markers,position})
  useEffect(()=>{if(!enabled||!element.current)return;let disposed=false;let map:import('leaflet').Map|undefined
  void import('leaflet').then(L=>{if(disposed||!element.current)return;const data=JSON.parse(signature) as {markers:typeof markers;position:Point|null};const center=data.position||data.markers[0]?.point||{lat:0.3924,lng:9.4536};map=L.map(element.current).setView([center.lat,center.lng],12)

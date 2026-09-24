@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
 
-export function LoginClient() {
+export function LoginClient({ allowDemoAuth }: { allowDemoAuth: boolean }) {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -46,8 +46,8 @@ export function LoginClient() {
             <div className="bg-destructive/10 text-destructive text-xs p-3 rounded-lg mb-4 text-center">{error}</div>
           )}
 
-          <OtpLogin />
-          <button className="ap-secondary w-full mb-6" disabled={loading} onClick={async()=>{setLoading(true);try{const result=await signIn('demo-admin',{redirect:false});if(result?.error)setError('Impossible d’ouvrir la démonstration administrateur.');else router.replace('/administration')}catch(e){console.error(e);setError('Connexion indisponible.')}finally{setLoading(false)}}}>Explorer l’administration (nouvelle démo privée)</button>
+          {allowDemoAuth && <OtpLogin />}
+          {allowDemoAuth && <button className="ap-secondary w-full mb-6" disabled={loading} onClick={async()=>{setLoading(true);try{const result=await signIn('demo-admin',{redirect:false});if(result?.error)setError('Impossible d’ouvrir la démonstration administrateur.');else router.replace('/administration')}catch(e){console.error(e);setError('Connexion indisponible.')}finally{setLoading(false)}}}>Explorer l’administration (nouvelle démo privée)</button>}
           <h2 className="text-sm font-semibold mb-3">Ou retrouver votre compte par e-mail</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -76,7 +76,7 @@ export function LoginClient() {
                   required
                   className="w-full pl-10 pr-10 py-2.5 bg-white rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-dark/20 focus:border-emerald-dark"
                 />
-                <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>

@@ -8,9 +8,15 @@ const nextConfig = {
   productionBrowserSourceMaps: false,
   outputFileTracingRoot: process.env.NEXT_OUTPUT_MODE ? path.join(__dirname, '../') : '/',
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
-  images: { unoptimized: true },
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'randomuser.me' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: '*.amazonaws.com' },
+    ],
+  },
   // Next 16 BLOCKS unlisted origins on /_next/* and /__nextjs* in dev — including the /_next/hmr
   // WEBSOCKET upgrade, and Turbopack gates client module wiring on that socket, so a blocked origin
   // means the page renders but never hydrates, with no console error (the block writes a raw
@@ -22,6 +28,36 @@ const nextConfig = {
   // wildcard: every conversation previews under the same parent domain and serves content its own
   // author controls, so `**.<domain>` would let any UNRELATED app's preview reach this dev server.
   allowedDevOrigins: ['127.0.0.1', '12d9e0ab1a.na113.preview.abacusai.app', '139a0b1fbb.na113.preview.abacusai.app'],
+  // Production-only: dev relies on relaxed cross-origin behavior for HMR (see allowedDevOrigins
+  // above), so these headers must never apply outside NODE_ENV==='production'.
+  async headers() {
+    if (process.env.NODE_ENV !== 'production') return [];
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' https://apps.abacus.ai",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https://randomuser.me https://images.unsplash.com https://tile.openstreetmap.org https://*.amazonaws.com",
+      "font-src 'self' data:",
+      "connect-src 'self' https://apps.abacus.ai https://*.amazonaws.com",
+      "frame-ancestors 'none'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join('; ');
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'Content-Security-Policy', value: csp },
+          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'geolocation=(self), camera=(), microphone=(), payment=()' },
+        ],
+      },
+    ];
+  },
 };
 
 const fs = require('fs');

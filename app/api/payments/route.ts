@@ -7,7 +7,7 @@ import { prisma } from '@/lib/prisma'
 import { preparePayment, refreshPayment, simulatePayment, getMissionForPayment, publicTransaction } from '@/lib/payment-server'
 const headers = {'Cache-Control':'private, no-store'}
 const input = z.discriminatedUnion('action',[
-  z.object({action:z.literal('initiate'),missionId:z.string().min(1).max(100),kind:z.enum(['deposit','refund','payout']),method:z.enum(['airtel','moov']).optional(),phone:z.string().max(30).optional()}),
+  z.object({action:z.literal('initiate'),missionId:z.string().min(1).max(100),kind:z.enum(['deposit','refund','payout']),method:z.enum(['airtel','moov']).optional(),phone:z.string().max(30).optional(),refundAmount:z.number().int().positive().optional()}),
   z.object({action:z.literal('refresh'),transactionId:z.string().uuid()}),
   z.object({action:z.literal('simulate'),transactionId:z.string().uuid(),outcome:z.enum(['COMPLETED','FAILED'])}),
 ])
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     if (text.length > 4000) return NextResponse.json({error:'Demande trop volumineuse.'},{status:413,headers})
     const body = input.parse(JSON.parse(text))
     if (body.action === 'initiate') {
-      const t = await preparePayment(session.user.id,body.missionId,body.kind,body.method,body.phone)
+      const t = await preparePayment(session.user.id,body.missionId,body.kind,body.method,body.phone,body.refundAmount)
       const result = await refreshPayment(t,true)
       return NextResponse.json({transaction:publicTransaction(result.transaction),message:result.message},{headers})
     }

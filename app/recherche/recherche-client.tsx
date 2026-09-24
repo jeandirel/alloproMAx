@@ -2,20 +2,54 @@
 import {useMemo,useState} from 'react'
 import {Search,Map,LocateFixed,SlidersHorizontal} from 'lucide-react'
 import {toast} from 'sonner'
-import {professionals,categories,quartiers} from '@/lib/data'
+import {professionals,categories} from '@/lib/data'
 import {distanceKm,zonePoints,type Point} from '@/lib/marketplace'
 import {useOptionalWorkspace} from '@/components/workspace-provider'
 import {ProfessionalCard} from '@/components/professional-card'
 import {PageHeading,Empty} from '@/components/market-ui'
 import {ServiceMap} from '@/components/service-map'
+import {LocationPicker,type LocationPickerValue} from '@/components/location-picker'
+import {CatalogueExplorer,type CatalogueExplorerValue} from '@/components/catalogue-explorer'
 const normalize=(s:string)=>s.normalize('NFD').replace(/\p{Diacritic}/gu,'').toLowerCase()
+// Three-tier zone match: prefer a relational neighborhoodId match, else widen
+// to cityId, else (today's reality — legacy demo Pro records only ever carry
+// free-text zone/zones) fall back to normalized-text matching. Falls through
+// to the next tier whenever the current one yields no candidates, so picking
+// one of the 8 legacy zone names via the picker (which resolves to a
+// neighborhoodId/cityId with zero id-tagged pros today) still lands on the
+// same text-matched results as before.
+type ZoneCandidate={zone:string;zones:string[];cityId?:string|null;neighborhoodId?:string|null;neighborhoodIds?:string[]}
+function filterByZone<T extends ZoneCandidate>(list:T[],zoneLoc:LocationPickerValue|null,zoneName:string):T[]{
+ const nid=zoneLoc?.neighborhoodId||null
+ if(nid){const byNeighborhood=list.filter(p=>p.neighborhoodId===nid||p.neighborhoodIds?.includes(nid));if(byNeighborhood.length)return byNeighborhood}
+ const cid=zoneLoc?.cityId||null
+ if(cid){const byCity=list.filter(p=>p.cityId===cid);if(byCity.length)return byCity}
+ if(!zoneName)return list
+ const zn=normalize(zoneName)
+ return list.filter(p=>normalize(p.zone)===zn||p.zones.some(z=>normalize(z)===zn))
+}
+// Two-tier service match: prefer a relational serviceId match (from the
+// catalogue explorer), but only if it actually yields candidates — today's
+// demo Pro records carry no serviceIds yet, so this tier is a no-op fallback
+// until pros start selecting catalogue services on their profile. Falls
+// through to whatever the existing free-text query/category filters already
+// produced, so picking a precise service never loses results for legacy data.
+type ServiceCandidate={id:string;serviceIds?:string[]}
+function filterByService<T extends ServiceCandidate>(list:T[],serviceLoc:CatalogueExplorerValue|null):T[]{
+ const sid=serviceLoc?.serviceId||null
+ if(sid){const byService=list.filter(p=>p.serviceIds?.includes(sid));if(byService.length)return byService}
+ return list
+}
 export function RechercheClient({initialQuery,initialCat,initialZone=''}:{initialQuery:string;initialCat:string;initialZone?:string}){
- const ws=useOptionalWorkspace();const state=ws?.state;const [query,setQuery]=useState(initialQuery);const [cat,setCat]=useState(initialCat);const [online,setOnline]=useState(false);const [verified,setVerified]=useState(false);const [rating,setRating]=useState(0);const [maxPrice,setMaxPrice]=useState('');const [maxDistance,setMaxDistance]=useState('');const [sort,setSort]=useState('note');const [map,setMap]=useState(false);const [filters,setFilters]=useState(false);const [zone,setZone]=useState(initialZone);const [position,setPosition]=useState<Point|null>(null)
+ const ws=useOptionalWorkspace();const state=ws?.state;const [query,setQuery]=useState(initialQuery);const [cat,setCat]=useState(initialCat);const [online,setOnline]=useState(false);const [verified,setVerified]=useState(false);const [rating,setRating]=useState(0);const [maxPrice,setMaxPrice]=useState('');const [maxDistance,setMaxDistance]=useState('');const [sort,setSort]=useState('note');const [map,setMap]=useState(false);const [filters,setFilters]=useState(false);const [zone,setZone]=useState(initialZone);const [zoneLoc,setZoneLoc]=useState<LocationPickerValue|null>(null);const [serviceLoc,setServiceLoc]=useState<CatalogueExplorerValue|null>(null);const [position,setPosition]=useState<Point|null>(null)
+ // `zone` (legacy ?zone= URL param / free text) stays wired for back-compat;
+ // it takes a backseat as soon as the picker commits a value into zoneLoc.
+ const zoneName=zoneLoc?.displayName||zone
  const cats=state?.categories.filter(c=>c.active).map(c=>c.name)||categories.map(c=>c.nom);const data=state?.pros||professionals;const origin=position||state?.profile.location||zonePoints[state?.profile.quartier||'Libreville Centre']||zonePoints['Libreville Centre']
- const filtered=useMemo(()=>{let list=data.filter(p=>!('suspended'in p&&p.suspended)&&cats.includes(p.categorie));if(query.trim())list=list.filter(p=>normalize(`${p.name} ${p.metier} ${p.categorie} ${p.services.map(s=>s.nom).join(' ')}`).includes(normalize(query)));if(cat)list=list.filter(p=>normalize(p.categorie).includes(normalize(cat)));if(zone)list=list.filter(p=>p.zones.includes(zone));if(online)list=list.filter(p=>p.enLigne);if(verified)list=list.filter(p=>p.verifie);list=list.filter(p=>p.note>=rating);if(maxPrice)list=list.filter(p=>p.tarifMin<=Number(maxPrice));if(maxDistance)list=list.filter(p=>distanceKm(origin,zonePoints[p.zone]||zonePoints['Libreville Centre'])<=Number(maxDistance));return list.sort((a,b)=>sort==='prix'?a.tarifMin-b.tarifMin:sort==='prix-desc'?b.tarifMin-a.tarifMin:sort==='distance'?distanceKm(origin,zonePoints[a.zone]||origin)-distanceKm(origin,zonePoints[b.zone]||origin):b.note-a.note)},[data,cats,query,cat,zone,online,verified,rating,maxPrice,maxDistance,origin,sort])
+ const filtered=useMemo(()=>{let list=data.filter(p=>!('suspended'in p&&p.suspended)&&cats.includes(p.categorie));if(query.trim())list=list.filter(p=>normalize(`${p.name} ${p.metier} ${p.categorie} ${p.services.map(s=>s.nom).join(' ')}`).includes(normalize(query)));if(cat)list=list.filter(p=>normalize(p.categorie).includes(normalize(cat)));list=filterByService(list,serviceLoc);list=filterByZone(list,zoneLoc,zoneName);if(online)list=list.filter(p=>p.enLigne);if(verified)list=list.filter(p=>p.verifie);list=list.filter(p=>p.note>=rating);if(maxPrice)list=list.filter(p=>p.tarifMin<=Number(maxPrice));if(maxDistance)list=list.filter(p=>distanceKm(origin,zonePoints[p.zone]||zonePoints['Libreville Centre'])<=Number(maxDistance));return list.sort((a,b)=>sort==='prix'?a.tarifMin-b.tarifMin:sort==='prix-desc'?b.tarifMin-a.tarifMin:sort==='distance'?distanceKm(origin,zonePoints[a.zone]||origin)-distanceKm(origin,zonePoints[b.zone]||origin):b.note-a.note)},[data,cats,query,cat,serviceLoc,zoneLoc,zoneName,online,verified,rating,maxPrice,maxDistance,origin,sort])
 
- const filterCount=Number(online)+Number(verified)+Number(rating>0)+Number(Boolean(maxPrice))+Number(Boolean(maxDistance))+Number(Boolean(zone))
- const reset=()=>{setQuery('');setCat('');setZone('');setOnline(false);setVerified(false);setRating(0);setMaxPrice('');setMaxDistance('');setSort('note')}
+ const filterCount=Number(online)+Number(verified)+Number(rating>0)+Number(Boolean(maxPrice))+Number(Boolean(maxDistance))+Number(Boolean(zoneName))+Number(Boolean(serviceLoc))
+ const reset=()=>{setQuery('');setCat('');setZone('');setZoneLoc(null);setServiceLoc(null);setOnline(false);setVerified(false);setRating(0);setMaxPrice('');setMaxDistance('');setSort('note')}
  return <main className="ap-client-page">
    <div className="mb-7 rounded-[2rem] bg-primary/5 p-5 sm:p-8"><PageHeading title="Le bon professionnel, près de vous" subtitle="Votre prochain coup de main commence ici. Comparez les services, les disponibilités et les tarifs."/>
      <div className="flex flex-wrap gap-2"><label className="relative min-w-0 basis-full sm:flex-1 sm:basis-auto"><Search size={20} className="absolute left-4 top-4 text-muted-foreground"/><input className="ap-input !min-h-14 !rounded-2xl !pl-12" aria-label="Rechercher un service ou un professionnel" list="service-suggestions" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Plombier, ménage, coiffure…"/><datalist id="service-suggestions">{cats.map(c=><option key={c} value={c}/>)}{data.map(p=><option key={p.id} value={p.name}/>)}</datalist></label>
@@ -32,7 +66,8 @@ export function RechercheClient({initialQuery,initialCat,initialZone=''}:{initia
          <label className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked={verified} onChange={e=>setVerified(e.target.checked)}/>Vérifié uniquement</label>
          <label className="ap-label">Note minimum<select className="ap-input mt-2" value={rating} onChange={e=>setRating(Number(e.target.value))}><option value={0}>Toutes les notes</option><option value={4}>4/5 et plus</option><option value={4.5}>4,5/5 et plus</option></select></label>
          <label className="ap-label">Tarif de départ maximum (FCFA)<input className="ap-input mt-2" type="number" min={0} value={maxPrice} onChange={e=>setMaxPrice(e.target.value)} placeholder="Sans limite"/></label>
-         <label className="ap-label">Zone d’intervention<select className="ap-input mt-2" value={zone} onChange={e=>setZone(e.target.value)}><option value="">Toutes les zones</option>{quartiers.map(q=><option key={q}>{q}</option>)}</select></label>
+         <label className="ap-label">Service précis<CatalogueExplorer variant="inline" className="mt-2" value={serviceLoc} onChange={setServiceLoc} placeholder="Quel service recherchez-vous ?"/></label>
+         <label className="ap-label">Zone d’intervention<LocationPicker variant="inline" value={zoneLoc} onChange={setZoneLoc} placeholder="Toutes les zones" className="mt-2"/></label>
          <label className="ap-label">Distance maximale (km)<input className="ap-input mt-2" type="number" min={0} value={maxDistance} onChange={e=>setMaxDistance(e.target.value)} placeholder="Sans limite"/></label>
          <button className="ap-secondary !px-3" onClick={()=>{if(!navigator.geolocation){toast.error('Localisation indisponible.');return}navigator.geolocation.getCurrentPosition(p=>setPosition({lat:p.coords.latitude,lng:p.coords.longitude}),()=>toast.error('Localisation refusée : distances calculées depuis votre quartier ou Libreville Centre.'),{timeout:10000})}}><LocateFixed size={17} className="shrink-0"/>Utiliser ma position</button>
          <p className="text-xs leading-relaxed text-muted-foreground">Distances à vol d’oiseau ; positions des professionnels approximatives.</p>

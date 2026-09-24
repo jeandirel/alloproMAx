@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    # These are dummy/non-secret values that only exist to satisfy module-scope
+    # `process.env.*` reads at build time (see auth.ts, lib/prisma.ts, lib/aws-config.ts,
+    # lib/pawapay.ts, app/layout.tsx). No live database or AWS account is contacted:
+    # `npx prisma generate` only reads prisma/schema.prisma, and `next build` never opens
+    # a DB connection for this app (all data access happens in dynamically-rendered request
+    # handlers / the per-user JSON sandbox, not at build/prerender time).
+    env:
+      DATABASE_URL: "postgresql://user:pass@localhost:5432/dummy?connect_timeout=1"
+      NEXTAUTH_SECRET: "ci-dummy-secret-not-for-real-use"
+      AUTH_SECRET: "ci-dummy-secret-not-for-real-use"
+      NEXTAUTH_URL: "http://localhost:3000"
+      AWS_REGION: "us-east-1"
+      AWS_BUCKET_NAME: "ci-dummy-bucket"
+      AWS_FOLDER_PREFIX: "ci-dummy"
+      ALLOW_DEMO_AUTH: "false"
+      PAWAPAY_ENVIRONMENT: "mock"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Lint
+        run: npm run lint
+
+      # `if: !cancelled()` runs each remaining step even if an earlier one (e.g. Lint) failed,
+      # so a lint regression can't silently hide a typecheck/test/build regression underneath it —
+      # only an explicit cancellation skips the rest. The job's overall result still reports
+      # failure if any step failed; this only prevents later steps from being hidden, not ignored.
+      - name: Typecheck
+        if: ${{ !cancelled() }}
+        run: npm run typecheck
+
+      - name: Test
+        if: ${{ !cancelled() }}
+        run: npm test
+
+      - name: Build
+        if: ${{ !cancelled() }}
+        run: npm run build

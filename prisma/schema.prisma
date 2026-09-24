@@ -1,13 +1,16 @@
 generator client {
-    provider = "prisma-client-js"
-    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
+// =========================================================================
+// AUTH (NextAuth) — inchange, enrichi de champs internationaux optionnels.
+// =========================================================================
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -16,11 +19,38 @@ model User {
   password      String?
   image         String?
   role          String    @default("user")
+  phone         String?
+  country       String    @default("GA")
+  locale        String    @default("fr")
+  timezone      String    @default("Africa/Libreville")
+  suspended     Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  accounts      Account[]
-  sessions      Session[]
-  bookings      Booking[]
+
+  accounts       Account[]
+  sessions       Session[]
+  bookings       Booking[]
+  addresses      Address[]
+  professional   Professional?
+  favorites      Favorite[]
+  reviewsWritten Review[]
+  notifications  Notification[]
+  messages       Message[]
+  conversations  Conversation[]
+  bookingEvents  BookingEvent[]
+  disputeEvents  DisputeEvent[]
+  disputesRuled  Dispute[]
+  reportsFiled   Report[]               @relation("ReportReporter")
+  reportsRuled   Report[]               @relation("ReportResolver")
+  docsReviewed   ProfessionalDocument[] @relation("DocumentReviewer")
+  auditLogs      AuditLog[]
+  invoices       Invoice[]
+
+  locationSuggestionsSubmitted LocationSuggestion[] @relation("LocationSuggestionSubmitter")
+  locationSuggestionsReviewed  LocationSuggestion[] @relation("LocationSuggestionReviewer")
+
+  serviceSuggestionsSubmitted ServiceSuggestion[] @relation("ServiceSuggestionSubmitter")
+  serviceSuggestionsReviewed  ServiceSuggestion[] @relation("ServiceSuggestionReviewer")
 }
 
 model Account {
@@ -57,31 +87,6 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model Booking {
-  id              String   @id @default(cuid())
-  userId          String
-  professionalId  String
-  service         String
-  description     String?  @db.Text
-  address         String
-  quartier        String
-  accessNotes     String?  @db.Text
-  date            DateTime
-  urgent          Boolean  @default(false)
-  status          String   @default("en_attente")
-  basePrice       Int
-  serviceFee      Int
-  totalPrice      Int
-  paymentMethod   String?
-  paymentNumber   String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([status])
-}
-
 model ContactSubmission {
   id        String   @id @default(cuid())
   name      String
@@ -93,6 +98,9 @@ model ContactSubmission {
 }
 
 // Investor sandbox: each authenticated user owns an isolated demonstration.
+// CONSERVE TEL QUEL : lib/workspace-server.ts, app/api/workspace/route.ts et
+// lib/marketplace-engine.ts continuent de lire/ecrire ce modele. La bascule
+// vers les tables relationnelles ci-dessous est progressive et separee.
 model DemoWorkspace {
   id        String   @id @default(cuid())
   userId    String   @unique
@@ -101,6 +109,9 @@ model DemoWorkspace {
   updatedAt DateTime @updatedAt
 }
 
+// Stockage S3 reel (presigned URLs). Reutilise comme backing store pour les
+// documents KYC, la galerie professionnelle, les photos de reservation et
+// les preuves de litige — pas de systeme de fichiers parallele.
 model UploadedAsset {
   id                 String   @id @default(cuid())
   userId             String
@@ -111,27 +122,37 @@ model UploadedAsset {
   size               Int
   complete           Boolean  @default(false)
   createdAt          DateTime @default(now())
+
+  document        ProfessionalDocument?
+  bookingAsset    BookingAsset?
+  disputeEvidence DisputeEvidence?
+  invoice         Invoice?
+
   @@index([userId])
 }
 
 // Durable journal; a new attempt is allowed only after a confirmed failure.
+// Modele de reference (verrouillage SQL, idempotence, machine a etats).
+// GARDE TEL QUEL : pas de FK stricte sur missionId tant que la bascule du
+// flux JSON vers Booking n'est pas faite (les IDs de mission actuels ne
+// correspondent pas encore a de vraies lignes Booking).
 model PaymentTransaction {
-  id            String   @id
-  userId        String
-  missionId     String
-  kind          String
-  attempt       Int
-  mode          String
-  status        String   @default("CREATED")
-  amount        Int
-  currency      String   @default("XAF")
-  provider      String
-  phoneNumber   String
-  depositId     String?
-  failureCode   String?
-  checkedAt     DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          String    @id
+  userId      String
+  missionId   String
+  kind        String
+  attempt     Int
+  mode        String
+  status      String    @default("CREATED")
+  amount      Int
+  currency    String    @default("XAF")
+  provider    String
+  phoneNumber String
+  depositId   String?
+  failureCode String?
+  checkedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@unique([userId, missionId, kind, attempt])
 }
@@ -142,4 +163,667 @@ model DemoOtp {
   expiresAt DateTime
   attempts  Int      @default(0)
   used      Boolean  @default(false)
+}
+
+// =========================================================================
+// CATALOGUE RELATIONNEL (remplace le clonage de lib/data.ts par utilisateur)
+// =========================================================================
+
+model Address {
+  id             String   @id @default(cuid())
+  userId         String
+  label          String?
+  line1          String
+  line2          String?
+  quartier       String?
+  city           String   @default("Libreville")
+  region         String?
+  postalCode     String?
+  country        String   @default("GA")
+  lat            Float?
+  lng            Float?
+  isDefault      Boolean  @default(false)
+  provinceId     String?
+  cityId         String?
+  neighborhoodId String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings     Booking[]
+  province     Province?     @relation(fields: [provinceId], references: [id])
+  cityRef      City?         @relation(fields: [cityId], references: [id])
+  neighborhood Neighborhood? @relation(fields: [neighborhoodId], references: [id])
+
+  @@index([userId])
+  @@index([provinceId])
+  @@index([cityId])
+  @@index([neighborhoodId])
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  icon        String?
+  description String?  @db.Text
+  active      Boolean  @default(true)
+  position    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  professionals Professional[]
+  services      Service[]
+  bookings      Booking[]
+
+  // Catalogue de services (taxonomie) — additif, distinct des Service
+  // ci-dessus qui restent des annonces individuelles de professionnels.
+  subcategories      ServiceSubcategory[]
+  catalogServices    CatalogService[]
+  serviceSuggestions ServiceSuggestion[]
+}
+
+model Professional {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  categoryId     String
+  headline       String?
+  bio            String?  @db.Text
+  zone           String?
+  zones          String[]
+  provinceId     String?
+  cityId         String?
+  neighborhoodId String?
+  experience     Int      @default(0)
+  ratingAvg      Float    @default(0)
+  ratingCount    Int      @default(0)
+  responseRate   Int?
+  avgReplyTime   String?
+  availability   String?
+  online         Boolean  @default(false)
+  priceFrom      Int      @default(0)
+  photo          String?
+  gallery        String[]
+  kycStatus      String   @default("brouillon") // brouillon | en_cours | verifie | refuse
+  kycReason      String?  @db.Text
+  suspended      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user          User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category      Category               @relation(fields: [categoryId], references: [id])
+  services      Service[]
+  documents     ProfessionalDocument[]
+  bookings      Booking[]
+  reviews       Review[]
+  favorites     Favorite[]
+  conversations Conversation[]
+  payouts       Payout[]
+  province      Province?              @relation(fields: [provinceId], references: [id])
+  city          City?                  @relation(fields: [cityId], references: [id])
+  neighborhood  Neighborhood?          @relation(fields: [neighborhoodId], references: [id])
+
+  // Catalogue de services (taxonomie) — liste des CatalogService que ce
+  // professionnel propose, distincte de `services` (annonces Service ci-dessus).
+  professionalServices ProfessionalService[]
+
+  @@index([categoryId])
+  @@index([online])
+  @@index([ratingAvg])
+  @@index([categoryId, ratingAvg])
+  @@index([zone])
+  @@index([provinceId])
+  @@index([cityId])
+  @@index([neighborhoodId])
+}
+
+model Service {
+  id             String   @id @default(cuid())
+  professionalId String
+  categoryId     String
+  name           String
+  price          Int
+  active         Boolean  @default(true)
+  position       Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Pont de migration progressive : lie optionnellement cette annonce
+  // (nom libre + tarif) a une feuille de la taxonomie normalisee
+  // (CatalogService). Nullable pour ne pas casser les annonces existantes ;
+  // le rattachement se fait progressivement (cf. rapport Phase services).
+  catalogServiceId String?
+
+  professional   Professional    @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  category       Category        @relation(fields: [categoryId], references: [id])
+  catalogService CatalogService? @relation(fields: [catalogServiceId], references: [id])
+  bookings       Booking[]
+
+  @@unique([professionalId, name])
+  @@index([professionalId])
+  @@index([catalogServiceId])
+}
+
+// Documents KYC — reutilise UploadedAsset (S3), ajoute statut + tracabilite.
+model ProfessionalDocument {
+  id             String    @id @default(cuid())
+  professionalId String
+  type           String // recto | verso | casier | portrait | realisation
+  assetId        String    @unique
+  status         String    @default("en_attente") // en_attente | valide | refuse
+  reviewedById   String?
+  reviewedAt     DateTime?
+  reviewReason   String?   @db.Text
+  createdAt      DateTime  @default(now())
+
+  professional   Professional  @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  asset          UploadedAsset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  reviewedBy     User?         @relation("DocumentReviewer", fields: [reviewedById], references: [id])
+  retentionUntil DateTime?
+
+  @@index([professionalId])
+  @@index([type])
+}
+
+// =========================================================================
+// RESERVATION — remplace la Mission JSON. Reprend le modele Booking
+// existant (mort en code) comme le VRAI modele relationnel.
+// =========================================================================
+model Booking {
+  id             String    @id @default(cuid())
+  code           String    @unique
+  userId         String
+  professionalId String
+  serviceId      String?
+  categoryId     String
+  addressId      String?
+  description    String?   @db.Text
+  address        String // snapshot fige au moment de la reservation, distinct d'addressRef (carnet d'adresses mutable)
+  quartier       String
+  neighborhoodId String?
+  accessNotes    String?   @db.Text
+  date           DateTime
+  urgent         Boolean   @default(false)
+  status         String    @default("en_attente")
+  basePrice      Int
+  serviceFee     Int
+  totalPrice     Int
+  paymentMethod  String?
+  paymentNumber  String?
+  paymentStatus  String    @default("a_payer")
+  requestKey     String?   @unique
+  reportText     String?   @db.Text // signalement rapide inline, distinct du modele Report/Dispute structure
+  deadline       DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  professional Professional  @relation(fields: [professionalId], references: [id], onDelete: Restrict)
+  service      Service?      @relation(fields: [serviceId], references: [id])
+  category     Category      @relation(fields: [categoryId], references: [id])
+  addressRef   Address?      @relation(fields: [addressId], references: [id])
+  neighborhood Neighborhood? @relation(fields: [neighborhoodId], references: [id])
+
+  events       BookingEvent[]
+  assets       BookingAsset[]
+  dispute      Dispute?
+  review       Review?
+  payout       Payout?
+  invoice      Invoice?
+  conversation Conversation?
+
+  @@index([userId, status, date])
+  @@index([professionalId, status, date])
+  @@index([status])
+  @@index([date])
+  @@index([neighborhoodId])
+}
+
+// Fichiers lies a une reservation (demande initiale, avant/apres intervention).
+model BookingAsset {
+  id        String   @id @default(cuid())
+  bookingId String
+  assetId   String
+  kind      String // request | before | after
+  createdAt DateTime @default(now())
+
+  booking Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  asset   UploadedAsset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId])
+  @@index([bookingId])
+}
+
+// Journal d'audit simplifie remplaçant le tableau events[] en texte libre.
+model BookingEvent {
+  id        String   @id @default(cuid())
+  bookingId String
+  actorId   String?
+  actorRole String // client | professionnel | administrateur | system
+  type      String
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  actor   User?   @relation(fields: [actorId], references: [id])
+
+  @@index([bookingId])
+}
+
+// Un seul avis par reservation validee/payee.
+model Review {
+  id             String   @id @default(cuid())
+  bookingId      String   @unique
+  professionalId String
+  authorId       String
+  quality        Int
+  punctuality    Int
+  communication  Int
+  comment        String?  @db.Text
+  hidden         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  booking      Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  author       User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([professionalId])
+}
+
+// Litige avec historique/tracabilite structuree (remplace le champ mutable).
+model Dispute {
+  id             String    @id @default(cuid())
+  bookingId      String    @unique
+  reason         String    @db.Text
+  status         String    @default("ouvert") // ouvert | resolu
+  decision       String? // refund | release
+  decisionReason String?   @db.Text
+  resolvedById   String?
+  resolvedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  booking    Booking           @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  resolvedBy User?             @relation(fields: [resolvedById], references: [id])
+  evidence   DisputeEvidence[]
+  events     DisputeEvent[]
+
+  @@index([status])
+}
+
+model DisputeEvidence {
+  id        String   @id @default(cuid())
+  disputeId String
+  assetId   String   @unique
+  createdAt DateTime @default(now())
+
+  dispute Dispute       @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+  asset   UploadedAsset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+}
+
+model DisputeEvent {
+  id        String   @id @default(cuid())
+  disputeId String
+  actorId   String?
+  actorRole String
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+
+  dispute Dispute @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+  actor   User?   @relation(fields: [actorId], references: [id])
+
+  @@index([disputeId])
+}
+
+// Messagerie — un fil par reservation (comme l'ancien thread par missionId).
+// Un meme couple client/pro peut avoir plusieurs fils s'il rebooke.
+model Conversation {
+  id             String   @id @default(cuid())
+  bookingId      String?  @unique
+  clientId       String
+  professionalId String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  booking      Booking?     @relation(fields: [bookingId], references: [id])
+  client       User         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  messages     Message[]
+
+  @@index([clientId, professionalId])
+  @@index([professionalId])
+}
+
+model Message {
+  id             String    @id @default(cuid())
+  conversationId String
+  authorId       String
+  authorRole     String
+  body           String    @db.Text
+  readAt         DateTime?
+  createdAt      DateTime  @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  author       User         @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([conversationId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  role      String
+  proId     String?
+  text      String   @db.Text
+  href      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+}
+
+// Favori unique par paire utilisateur/professionnel.
+model Favorite {
+  id             String   @id @default(cuid())
+  userId         String
+  professionalId String
+  createdAt      DateTime @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, professionalId])
+}
+
+// Signalement — distinct du litige (peut cibler un profil, un avis, un message).
+model Report {
+  id           String    @id @default(cuid())
+  reporterId   String?
+  targetType   String // professional | booking | review | message
+  targetId     String
+  reason       String    @db.Text
+  status       String    @default("ouvert") // ouvert | resolu
+  resolvedById String?
+  resolvedAt   DateTime?
+  createdAt    DateTime  @default(now())
+
+  reporter   User? @relation("ReportReporter", fields: [reporterId], references: [id])
+  resolvedBy User? @relation("ReportResolver", fields: [resolvedById], references: [id])
+
+  @@index([status])
+  @@index([targetType, targetId])
+}
+
+// Versement au professionnel — distinct de la transaction de paiement client.
+model Payout {
+  id             String    @id @default(cuid())
+  professionalId String
+  bookingId      String?   @unique
+  amount         Int
+  currency       String    @default("XAF")
+  status         String    @default("a_verser") // a_verser | verse | echoue
+  provider       String?
+  phoneNumber    String?
+  transactionRef String?
+  processedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Restrict)
+  booking      Booking?     @relation(fields: [bookingId], references: [id])
+
+  @@index([professionalId])
+  @@index([status])
+}
+
+// Facture avec numerotation sequentielle (ex. INV-2026-000001).
+model Invoice {
+  id         String   @id @default(cuid())
+  number     String   @unique
+  bookingId  String   @unique
+  userId     String
+  amount     Int
+  commission Int
+  currency   String   @default("XAF")
+  issuedAt   DateTime @default(now())
+  pdfAssetId String?  @unique
+
+  booking  Booking        @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  user     User           @relation(fields: [userId], references: [id], onDelete: Restrict)
+  pdfAsset UploadedAsset? @relation(fields: [pdfAssetId], references: [id])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actorRole  String?
+  action     String
+  targetType String?
+  targetId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id])
+
+  @@index([targetType, targetId])
+  @@index([createdAt])
+}
+
+// Configuration plateforme — ligne unique (id fixe = 1).
+model PlatformSettings {
+  id         Int      @id @default(1)
+  commission Float    @default(12)
+  autoHours  Int      @default(48)
+  updatedAt  DateTime @updatedAt
+}
+
+// =========================================================================
+// LOCALISATION GABON (province -> ville -> quartier) — catalogue normalise
+// alimente par prisma/seed-data/gabon-locations.json (scripts/import-locations.ts).
+// Additif uniquement : les champs zone/zones (Professional), quartier/city/region
+// (Address, Booking) en texte libre restent inchanges et continuent de fonctionner.
+// =========================================================================
+
+model Province {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  normalizedName String   @unique
+  countryCode    String   @default("GA")
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  cities        City[]
+  professionals Professional[]
+  addresses     Address[]
+  suggestions   LocationSuggestion[]
+
+  @@index([countryCode])
+}
+
+model City {
+  id             String   @id @default(cuid())
+  provinceId     String
+  name           String
+  slug           String
+  normalizedName String
+  isActive       Boolean  @default(true)
+  source         String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  province      Province             @relation(fields: [provinceId], references: [id], onDelete: Restrict)
+  neighborhoods Neighborhood[]
+  professionals Professional[]
+  addresses     Address[]
+  suggestions   LocationSuggestion[]
+
+  @@unique([provinceId, normalizedName])
+  @@index([provinceId])
+  @@index([slug])
+}
+
+model Neighborhood {
+  id             String   @id @default(cuid())
+  cityId         String
+  name           String
+  slug           String
+  normalizedName String
+  isActive       Boolean  @default(true)
+  source         String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  city          City           @relation(fields: [cityId], references: [id], onDelete: Restrict)
+  professionals Professional[]
+  addresses     Address[]
+  bookings      Booking[]
+
+  @@unique([cityId, normalizedName])
+  @@index([cityId])
+  @@index([slug])
+  @@index([normalizedName])
+}
+
+model LocationSuggestion {
+  id             String    @id @default(cuid())
+  type           String // CITY | NEIGHBORHOOD
+  provinceId     String?
+  cityId         String?
+  proposedName   String
+  normalizedName String
+  extraInfo      String?   @db.Text
+  submittedBy    String?
+  submitterEmail String?
+  status         String    @default("PENDING") // PENDING | APPROVED | REJECTED
+  adminComment   String?   @db.Text
+  reviewedBy     String?
+  reviewedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  province  Province? @relation(fields: [provinceId], references: [id])
+  city      City?     @relation(fields: [cityId], references: [id])
+  submitter User?     @relation("LocationSuggestionSubmitter", fields: [submittedBy], references: [id])
+  reviewer  User?     @relation("LocationSuggestionReviewer", fields: [reviewedBy], references: [id])
+
+  @@index([status])
+  @@index([type, status])
+  @@index([normalizedName])
+}
+
+// =========================================================================
+// CATALOGUE DE SERVICES (Categorie -> Sous-categorie -> Service) — catalogue
+// normalise alimente par prisma/seed-data/services-catalogue.json
+// (scripts/import-catalogue.ts).
+//
+// IMPORTANT : le modele `Service` existant (ci-dessus) reste une ANNONCE
+// individuelle d'un professionnel (professionalId + price + reference par
+// Booking) — ce n'est PAS une feuille de taxonomie. Pour eviter toute
+// collision de nom/semantique, la feuille de taxonomie est un nouveau modele
+// `CatalogService`. Le pont progressif entre les deux est le champ optionnel
+// `Service.catalogServiceId` ajoute ci-dessus.
+//
+// Additif uniquement : Category est reutilisee et etendue (description +
+// nouvelles back-relations), rien n'est renomme ni supprime.
+// =========================================================================
+
+model ServiceSubcategory {
+  id             String   @id @default(cuid())
+  categoryId     String
+  name           String
+  slug           String
+  normalizedName String
+  description    String?  @db.Text
+  icon           String?
+  sortOrder      Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  category    Category            @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  services    CatalogService[]
+  suggestions ServiceSuggestion[]
+
+  @@unique([categoryId, normalizedName])
+  @@index([categoryId])
+}
+
+// Feuille de taxonomie (ex. Plomberie -> "Debouchage canalisation"), distincte
+// du modele `Service` (annonce payante d'un professionnel).
+model CatalogService {
+  id             String   @id @default(cuid())
+  categoryId     String
+  subcategoryId  String
+  name           String
+  slug           String
+  normalizedName String
+  description    String?  @db.Text
+  keywords       String[]
+  synonyms       String[]
+  searchCount    Int      @default(0) // best-effort, incremente seulement quand un utilisateur choisit ce resultat
+  sortOrder      Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  category       Category              @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  subcategory    ServiceSubcategory    @relation(fields: [subcategoryId], references: [id], onDelete: Restrict)
+  professionals  ProfessionalService[]
+  legacyServices Service[]
+
+  @@unique([subcategoryId, normalizedName])
+  @@index([categoryId])
+  @@index([subcategoryId])
+  @@index([slug])
+}
+
+// Liaison many-to-many Professionnel <-> CatalogService (le professionnel
+// "propose" une feuille de taxonomie, independamment de ses annonces Service
+// existantes qui portent leur propre prix/description libres).
+model ProfessionalService {
+  id             String   @id @default(cuid())
+  professionalId String
+  serviceId      String // FK vers CatalogService (nom de champ impose par la spec produit)
+  isActive       Boolean  @default(true)
+  priceFrom      Int?
+  priceType      String?
+  description    String?  @db.Text
+  createdAt      DateTime @default(now())
+
+  professional Professional   @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  service      CatalogService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([professionalId, serviceId])
+  @@index([professionalId])
+  @@index([serviceId])
+}
+
+model ServiceSuggestion {
+  id             String    @id @default(cuid())
+  proposedName   String
+  normalizedName String
+  categoryId     String?
+  subcategoryId  String?
+  description    String?   @db.Text
+  submittedBy    String?
+  submitterEmail String?
+  status         String    @default("PENDING") // PENDING | APPROVED | REJECTED
+  adminComment   String?   @db.Text
+  reviewedBy     String?
+  reviewedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  category    Category?           @relation(fields: [categoryId], references: [id])
+  subcategory ServiceSubcategory? @relation(fields: [subcategoryId], references: [id])
+  submitter   User?               @relation("ServiceSuggestionSubmitter", fields: [submittedBy], references: [id])
+  reviewer    User?               @relation("ServiceSuggestionReviewer", fields: [reviewedBy], references: [id])
+
+  @@index([status])
+  @@index([normalizedName])
 }

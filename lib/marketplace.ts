@@ -5,9 +5,9 @@ export type Role = 'client' | 'professionnel' | 'administrateur'
 export type Status = 'en_attente' | 'acceptee' | 'en_route' | 'en_cours' | 'a_valider' | 'validee' | 'payee' | 'annulee' | 'litige'
 export type Point = { lat: number; lng: number }
 export type FileRef = { id: string; name: string }
-export type Pro = Professional & { kyc: 'brouillon' | 'en_cours' | 'verifie' | 'refuse'; reason: string; documents: Record<string, FileRef[]>; experience: number; location: Point; suspended: boolean; phone: string }
+export type Pro = Professional & { kyc: 'brouillon' | 'en_cours' | 'verifie' | 'refuse'; reason: string; documents: Record<string, FileRef[]>; experience: number; location: Point; suspended: boolean; phone: string; provinceId?: string | null; cityId?: string | null; neighborhoodId?: string | null; neighborhoodIds?: string[]; serviceIds?: string[] }
 export type Mission = {
-  id: string; professionalId: string; service: string; description: string; address: string; quartier: string; accessNotes: string;
+  id: string; professionalId: string; service: string; description: string; address: string; quartier: string; neighborhoodId?: string | null; accessNotes: string;
   date: string; urgent: boolean; status: Status; basePrice: number; serviceFee: number; totalPrice: number;
   paymentMethod: 'airtel' | 'moov'; payment: keyof typeof paymentLabels; paymentFlow?: PaymentFlow; location: Point | null;
   photos: FileRef[]; before: FileRef[]; after: FileRef[]; report: string; deadline: string | null;
@@ -19,7 +19,7 @@ export type Notice = { id: string; role: Role; proId?: string; text: string; hre
 export type Message = { id: string; thread: string; author: Role; text: string; at: string }
 export type Workspace = {
   role: Role; activeProId: string; onboarded: boolean;
-  profile: { name: string; email: string; phone: string; address: string; quartier: string; photo: FileRef[]; location: Point | null };
+  profile: { name: string; email: string; phone: string; address: string; quartier: string; provinceId?: string | null; cityId?: string | null; neighborhoodId?: string | null; photo: FileRef[]; location: Point | null };
   pros: Pro[]; missions: Mission[]; messages: Message[]; notifications: Notice[]; favorites: string[];
   categories: { name: string; active: boolean }[]; commission: number; autoHours: number;
   clientSuspended: boolean; reports: { id: string; target: string; reason: string; resolved: boolean }[];

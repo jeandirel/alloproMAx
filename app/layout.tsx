@@ -1,10 +1,13 @@
 import { Inter, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 import 'leaflet/dist/leaflet.css'
 import { PwaSupport } from '@/components/pwa-support'
 import { Toaster } from '@/components/ui/sonner'
 import { ChunkLoadErrorHandler } from '@/components/chunk-load-error-handler'
 import { AuthProvider } from '@/components/auth-provider'
+import { I18nProvider } from '@/lib/i18n/context'
+import { CookieConsent } from '@/components/cookie-consent'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,14 +36,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr" suppressHydrationWarning>
       <head>
-        <script src="https://apps.abacus.ai/chatllm/appllm-lib.js" />
+        <Script src="https://apps.abacus.ai/chatllm/appllm-lib.js" strategy="afterInteractive" />
       </head>
       <body className={`${inter.variable} ${jakartaSans.variable} ${jetbrainsMono.variable} font-sans bg-background text-foreground`}>
+        <a href="#contenu-principal" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-emerald-dark focus:px-4 focus:py-2 focus:text-white">
+          Aller au contenu principal
+        </a>
         <AuthProvider>
-          {children}
-          <Toaster />
-          <ChunkLoadErrorHandler />
-          <PwaSupport />
+          <I18nProvider locale="fr">
+            {/* Cible du lien d'évitement : un simple div, pas un <main> — presque toutes les
+                routes définissent déjà leur propre <main> (app-shell, pages client, etc.),
+                et l'imbriquer ici produirait un <main> dans un <main> (HTML invalide). */}
+            <div id="contenu-principal">{children}</div>
+            <CookieConsent />
+            <Toaster />
+            <ChunkLoadErrorHandler />
+            <PwaSupport />
+          </I18nProvider>
         </AuthProvider>
       </body>
     </html>

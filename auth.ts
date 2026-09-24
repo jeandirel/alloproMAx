@@ -4,6 +4,8 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { createHash, randomUUID } from 'crypto'
+import { isDemoAuthEnabled } from '@/lib/demo-mode'
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
@@ -15,7 +17,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     CredentialsProvider({
       id: 'demo-admin', name: 'Administration de démonstration', credentials: {},
-      async authorize() {
+      async authorize(_credentials, request) {
+        if (!isDemoAuthEnabled()) return null
+        const ip = getClientIp(request)
+        if (!checkRateLimit(`demo-admin:${ip}`, 5, 15 * 60000).allowed) return null
+        if (!checkRateLimit('global:demo-admin', 50, 15 * 60000).allowed) return null
         // No global administration: this identity only owns its isolated sandbox.
         const user = await prisma.user.create({data:{email:`${randomUUID()}@admin-demo.allopro.invalid`,name:'Administrateur Allo-Pro (démo)',role:'demo_admin'}})
         return {id:user.id,email:user.email,name:user.name}
@@ -25,7 +31,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       id: 'demo-otp',
       name: 'Code de démonstration',
       credentials: { challenge: {}, code: {} },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
+        if (!isDemoAuthEnabled()) return null
+        const ip = getClientIp(request)
+        if (!checkRateLimit(`demo-otp:${ip}`, 20, 15 * 60000).allowed) return null
+        if (!checkRateLimit('global:demo-otp', 200, 15 * 60000).allowed) return null
         if (typeof credentials.challenge !== 'string' || typeof credentials.code !== 'string') return null
         const challenge = await prisma.demoOtp.findUnique({ where: { id: credentials.challenge } })
         if (!challenge || challenge.used || challenge.expiresAt < new Date() || challenge.attempts >= 5) return null
@@ -43,8 +53,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: 'Email', type: 'email' },
         password: { label: 'Mot de passe', type: 'password' },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         if (!credentials?.email || !credentials?.password) return null
+        const ip = getClientIp(request)
+        const email = (credentials.email as string).toLowerCase()
+        if (!checkRateLimit(`login-ip:${ip}`, 20, 15 * 60000).allowed) return null
+        if (!checkRateLimit(`login-email:${email}`, 8, 15 * 60000).allowed) return null
+        if (!checkRateLimit('global:login', 500, 15 * 60000).allowed) return null
         const user = await prisma.user.findUnique({
           where: { email: credentials.email as string },
         })
@@ -54,6 +69,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           user.password
         )
         if (!isValid) return null
+        if (user.suspended) return null
         return { id: user.id, email: user.email, name: user.name, image: user.image }
       },
     }),
