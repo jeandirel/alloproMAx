@@ -1,0 +1,2 @@
+import type {MetadataRoute} from 'next'
+export default function manifest():MetadataRoute.Manifest{return {name:'Allo-Pro — Services à domicile',short_name:'Allo-Pro',description:'Le bon professionnel, au bon moment.',start_url:'/accueil',scope:'/',display:'standalone',background_color:'#F9F8F6',theme_color:'#0B6E4F',lang:'fr',icons:[{src:'/app-icon-v1-192.png',sizes:'192x192',type:'image/png',purpose:'any'},{src:'/app-icon-v1-512.png',sizes:'512x512',type:'image/png',purpose:'maskable'}]}}
