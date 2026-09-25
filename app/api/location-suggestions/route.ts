@@ -11,9 +11,7 @@ import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
 // obvious spam/injection attempts out of the moderation queue.
 const ABUSE_PATTERN = /https?:\/\/|www\.|[<>]/i
 
-// Exported for reuse by scripts/location-rules.test.ts (pure schema-shape
-// tests only — no live DB involved).
-export const bodySchema = z.object({
+const bodySchema = z.object({
   type: z.enum(['CITY', 'NEIGHBORHOOD']),
   provinceId: z.string().min(1),
   cityId: z.string().min(1).optional(),
