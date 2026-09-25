@@ -2,34 +2,41 @@
 
 import Link from 'next/link'
 import Image from '@/components/smart-image'
-import { useState } from 'react'
-import { quartiers } from '@/lib/data'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
   BadgeCheck, ShieldCheck,
-  Wrench, Zap, Sparkles, Scissors, Car, Wind, Truck, BookOpen,
-  MapPin, Star, ArrowRight,
+  Wrench, Sparkles, Scissors, Car, Truck, BookOpen,
+  Cpu, PartyPopper, Briefcase, Building2, Sprout, Gamepad2,
+  Star, ArrowRight,
   ClipboardList, UserCheck, CreditCard,
 } from 'lucide-react'
 import { SearchBar } from '@/components/search-bar'
+import { LocationPicker, type LocationPickerValue } from '@/components/location-picker'
 import { ProfessionalCard } from '@/components/professional-card'
 import { CounterAnimation } from '@/components/counter-animation'
 import { professionals } from '@/lib/data'
 
+// Keyed by real category name (from GET /api/services/categories) since the
+// DB's `icon` column isn't populated yet — falls back to Wrench for any
+// category added later that isn't in this list.
 const categoryIcons: Record<string, React.ElementType> = {
-  Wrench, Zap, Sparkles, Scissors, Car, Wind, Truck, BookOpen,
+  'Maison & Travaux': Wrench,
+  'Maison & Entretien': Sparkles,
+  'Transport & Logistique': Truck,
+  'Automobile & Moto': Car,
+  'Électronique & Informatique': Cpu,
+  'Sécurité': ShieldCheck,
+  'Beauté, Mode & Bien-être': Scissors,
+  'Événementiel & Prestations': PartyPopper,
+  'Éducation, Famille & Aide à la Personne': BookOpen,
+  'Services Professionnels & Digital': Briefcase,
+  'Immobilier & Études Techniques': Building2,
+  'Agriculture, Pêche & Nature': Sprout,
+  'Loisirs & Services Divers': Gamepad2,
 }
-
-const categories = [
-  { nom: 'Plomberie', icon: 'Wrench' },
-  { nom: 'Électricité', icon: 'Zap' },
-  { nom: 'Ménage', icon: 'Sparkles' },
-  { nom: 'Beauté & Bien-être', icon: 'Scissors' },
-  { nom: 'Mécanique auto', icon: 'Car' },
-  { nom: 'Climatisation', icon: 'Wind' },
-  { nom: 'Transport', icon: 'Truck' },
-  { nom: 'Tutorat', icon: 'BookOpen' },
-]
+const CATEGORIES_PREVIEW_COUNT = 8
+interface CategoryOption { id: string; name: string; slug: string }
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -38,7 +45,21 @@ const fadeUp = {
 
 export function LandingPage() {
   const featuredPros = professionals.filter((p) => p.enLigne).slice(0, 3)
-  const [zone, setZone] = useState('Libreville Centre')
+  const [zoneLoc, setZoneLoc] = useState<LocationPickerValue | null>(null)
+  const zone = zoneLoc?.displayName || 'Libreville Centre'
+  const [categories, setCategories] = useState<CategoryOption[]>([])
+  const [showAllCategories, setShowAllCategories] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/services/categories')
+      .then((r) => r.json())
+      .then((d) => { if (!cancelled) setCategories(d.categories ?? []) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [])
+
+  const visibleCategories = showAllCategories ? categories : categories.slice(0, CATEGORIES_PREVIEW_COUNT)
 
   return (
     <div className="ap-landing min-h-screen bg-background">
@@ -72,7 +93,9 @@ export function LandingPage() {
             <p className="mt-6 max-w-lg text-base leading-7 text-muted-foreground sm:text-lg">Le bon professionnel, au bon moment. Découvrez des services à domicile et des professionnels vérifiés à Libreville.</p>
             <div className="mt-7 rounded-3xl border border-border/40 bg-white p-3 shadow-lg sm:p-4">
               <SearchBar zone={zone}/>
-              <label className="mt-3 flex min-w-0 items-center gap-2 px-2 text-sm text-muted-foreground"><MapPin size={17} className="shrink-0 text-primary"/><span className="sr-only">Votre quartier au Gabon</span><select className="min-h-11 min-w-0 flex-1 rounded-lg bg-transparent px-1 text-base text-foreground" value={zone} onChange={e=>setZone(e.target.value)}>{quartiers.map(q=><option key={q}>{q}</option>)}</select><span className="text-xs">Gabon</span></label>
+              <div className="mt-3">
+                <LocationPicker variant="inline" value={zoneLoc} onChange={setZoneLoc} placeholder="Votre quartier au Gabon"/>
+              </div>
             </div>
             <div className="mt-6 flex flex-wrap gap-x-5 gap-y-3 text-xs font-medium text-muted-foreground"><span className="flex items-center gap-1.5"><BadgeCheck size={16} className="text-primary"/>Profils vérifiés</span><span className="flex items-center gap-1.5"><ClipboardList size={16} className="text-primary"/>Tarifs détaillés</span><span className="flex items-center gap-1.5"><CreditCard size={16} className="text-primary"/>Paiement de test</span></div>
           </div>
@@ -90,11 +113,11 @@ export function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl sm:text-3xl tracking-tight font-bold text-foreground font-display text-center mb-6">Nos catégories de services</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 md:gap-4">
-            {categories.map((cat, i) => {
-              const Icon = categoryIcons[cat.icon] ?? Wrench
+            {visibleCategories.map((cat, i) => {
+              const Icon = categoryIcons[cat.name] ?? Wrench
               return (
                 <motion.div
-                  key={cat.nom}
+                  key={cat.id}
                   custom={i}
                   initial="hidden"
                   whileInView="visible"
@@ -102,18 +125,29 @@ export function LandingPage() {
                   variants={fadeUp}
                 >
                   <Link
-                    href={`/recherche?cat=${encodeURIComponent(cat.nom)}`}
+                    href={`/recherche?cat=${encodeURIComponent(cat.name)}`}
                     className="ap-category-card group"
                   >
                     <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-emerald-dark/10 flex items-center justify-center group-hover:bg-emerald-dark/15 transition-colors">
                       <Icon className="w-5 h-5 md:w-6 md:h-6 text-emerald-dark" />
                     </div>
-                    <span className="text-sm font-semibold text-foreground leading-snug">{cat.nom}</span>
+                    <span className="text-sm font-semibold text-foreground leading-snug">{cat.name}</span>
                   </Link>
                 </motion.div>
               )
             })}
           </div>
+          {categories.length > CATEGORIES_PREVIEW_COUNT && (
+            <div className="mt-6 text-center">
+              <button
+                type="button"
+                onClick={() => setShowAllCategories((v) => !v)}
+                className="ap-secondary"
+              >
+                {showAllCategories ? 'Voir moins' : 'Voir plus'}
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
