@@ -13,11 +13,8 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerFooter, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
 
 // ---------------------------------------------------------------------------
-// STANDALONE COMPONENT — not wired into any form/page yet (deliberately; see
-// the services-catalogue report — profile-form.tsx / pro-dossier.tsx /
-// recherche-client.tsx / admin-dashboard.tsx wiring is deferred to a
-// follow-up pass to avoid clashing with a concurrent, unrelated
-// location-feature workflow editing those same files). Modeled closely on
+// Wired into pro-dossier.tsx ("Mes services (catalogue)") and
+// recherche-client.tsx ("Service précis"). Modeled closely on
 // components/location-picker.tsx and components/service-picker.tsx (same
 // popover/drawer shell, module-level caches, debounced search, "not found"
 // suggestion sub-flow) but adds the two things the product spec asks for on
@@ -50,6 +47,14 @@ export interface CatalogueExplorerProps {
   /** Controls the trigger's visual style only — content/behavior is identical. */
   variant?: 'popover' | 'inline'
   className?: string
+  /**
+   * Pre-scope where the picker opens (e.g. arriving from a category link
+   * elsewhere in the app) without committing an actual selection. Only used
+   * as a fallback when `value` itself doesn't already specify a position —
+   * unlike `value`, these never mark the picker as "has a selection".
+   */
+  initialCategoryId?: string | null
+  initialSubcategoryId?: string | null
 }
 
 interface CategoryOption { id: string; name: string; slug: string; icon: string | null }
@@ -188,7 +193,7 @@ function resolveCategoryIcon(category: CategoryOption): LucideIcon {
   return rule?.icon ?? LayoutGrid
 }
 
-export function CatalogueExplorer({ value, onChange, placeholder = 'Choisir un service', variant = 'popover', className }: CatalogueExplorerProps) {
+export function CatalogueExplorer({ value, onChange, placeholder = 'Choisir un service', variant = 'popover', className, initialCategoryId, initialSubcategoryId }: CatalogueExplorerProps) {
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const open = popoverOpen || drawerOpen
@@ -240,8 +245,8 @@ export function CatalogueExplorer({ value, onChange, placeholder = 'Choisir un s
   // a picker that already has a selection starts back where it left off.
   useEffect(() => {
     if (!open) return
-    setBrowseCategoryId(value?.categoryId || '')
-    setBrowseSubcategoryId(value?.subcategoryId || '')
+    setBrowseCategoryId(value?.categoryId || initialCategoryId || '')
+    setBrowseSubcategoryId(value?.subcategoryId || initialSubcategoryId || '')
     setBrowseCategoryName('')
     setBrowseSubcategoryName('')
     setSearchQuery('')

@@ -6,8 +6,6 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
   BadgeCheck, ShieldCheck,
-  Wrench, Sparkles, Scissors, Car, Truck, BookOpen,
-  Cpu, PartyPopper, Briefcase, Building2, Sprout, Gamepad2,
   Star, ArrowRight,
   ClipboardList, UserCheck, CreditCard,
 } from 'lucide-react'
@@ -15,26 +13,9 @@ import { SearchBar } from '@/components/search-bar'
 import { LocationPicker, type LocationPickerValue } from '@/components/location-picker'
 import { ProfessionalCard } from '@/components/professional-card'
 import { CounterAnimation } from '@/components/counter-animation'
+import { CategoryGrid, resolveCategoryIconByName } from '@/components/category-grid'
 import { professionals } from '@/lib/data'
 
-// Keyed by real category name (from GET /api/services/categories) since the
-// DB's `icon` column isn't populated yet — falls back to Wrench for any
-// category added later that isn't in this list.
-const categoryIcons: Record<string, React.ElementType> = {
-  'Maison & Travaux': Wrench,
-  'Maison & Entretien': Sparkles,
-  'Transport & Logistique': Truck,
-  'Automobile & Moto': Car,
-  'Électronique & Informatique': Cpu,
-  'Sécurité': ShieldCheck,
-  'Beauté, Mode & Bien-être': Scissors,
-  'Événementiel & Prestations': PartyPopper,
-  'Éducation, Famille & Aide à la Personne': BookOpen,
-  'Services Professionnels & Digital': Briefcase,
-  'Immobilier & Études Techniques': Building2,
-  'Agriculture, Pêche & Nature': Sprout,
-  'Loisirs & Services Divers': Gamepad2,
-}
 const CATEGORIES_PREVIEW_COUNT = 8
 interface CategoryOption { id: string; name: string; slug: string }
 
@@ -112,31 +93,11 @@ export function LandingPage() {
       <section className="py-10 sm:py-16 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl sm:text-3xl tracking-tight font-bold text-foreground font-display text-center mb-6">Nos catégories de services</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 md:gap-4">
-            {visibleCategories.map((cat, i) => {
-              const Icon = categoryIcons[cat.name] ?? Wrench
-              return (
-                <motion.div
-                  key={cat.id}
-                  custom={i}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
-                  variants={fadeUp}
-                >
-                  <Link
-                    href={`/recherche?cat=${encodeURIComponent(cat.name)}`}
-                    className="ap-category-card group"
-                  >
-                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-emerald-dark/10 flex items-center justify-center group-hover:bg-emerald-dark/15 transition-colors">
-                      <Icon className="w-5 h-5 md:w-6 md:h-6 text-emerald-dark" />
-                    </div>
-                    <span className="text-sm font-semibold text-foreground leading-snug">{cat.name}</span>
-                  </Link>
-                </motion.div>
-              )
-            })}
-          </div>
+          <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+            <CategoryGrid
+              items={visibleCategories.map((cat) => ({ id: cat.id, name: cat.name, icon: resolveCategoryIconByName(cat.name) }))}
+            />
+          </motion.div>
           {categories.length > CATEGORIES_PREVIEW_COUNT && (
             <div className="mt-6 text-center">
               <button

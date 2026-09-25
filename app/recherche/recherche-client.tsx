@@ -40,7 +40,7 @@ function filterByService<T extends ServiceCandidate>(list:T[],serviceLoc:Catalog
  if(sid){const byService=list.filter(p=>p.serviceIds?.includes(sid));if(byService.length)return byService}
  return list
 }
-export function RechercheClient({initialQuery,initialCat,initialZone=''}:{initialQuery:string;initialCat:string;initialZone?:string}){
+export function RechercheClient({initialQuery,initialCat,initialZone='',initialCategoryId='',initialSubcategoryId=''}:{initialQuery:string;initialCat:string;initialZone?:string;initialCategoryId?:string;initialSubcategoryId?:string}){
  const ws=useOptionalWorkspace();const state=ws?.state;const [query,setQuery]=useState(initialQuery);const [cat,setCat]=useState(initialCat);const [online,setOnline]=useState(false);const [verified,setVerified]=useState(false);const [rating,setRating]=useState(0);const [maxPrice,setMaxPrice]=useState('');const [maxDistance,setMaxDistance]=useState('');const [sort,setSort]=useState('note');const [map,setMap]=useState(false);const [filters,setFilters]=useState(false);const [zone,setZone]=useState(initialZone);const [zoneLoc,setZoneLoc]=useState<LocationPickerValue|null>(null);const [serviceLoc,setServiceLoc]=useState<CatalogueExplorerValue|null>(null);const [position,setPosition]=useState<Point|null>(null)
  // `zone` (legacy ?zone= URL param / free text) stays wired for back-compat;
  // it takes a backseat as soon as the picker commits a value into zoneLoc.
@@ -66,7 +66,7 @@ export function RechercheClient({initialQuery,initialCat,initialZone=''}:{initia
          <label className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked={verified} onChange={e=>setVerified(e.target.checked)}/>Vérifié uniquement</label>
          <label className="ap-label">Note minimum<select className="ap-input mt-2" value={rating} onChange={e=>setRating(Number(e.target.value))}><option value={0}>Toutes les notes</option><option value={4}>4/5 et plus</option><option value={4.5}>4,5/5 et plus</option></select></label>
          <label className="ap-label">Tarif de départ maximum (FCFA)<input className="ap-input mt-2" type="number" min={0} value={maxPrice} onChange={e=>setMaxPrice(e.target.value)} placeholder="Sans limite"/></label>
-         <label className="ap-label">Service précis<CatalogueExplorer variant="inline" className="mt-2" value={serviceLoc} onChange={setServiceLoc} placeholder="Quel service recherchez-vous ?"/></label>
+         <label className="ap-label">Service précis<CatalogueExplorer variant="inline" className="mt-2" value={serviceLoc} onChange={setServiceLoc} placeholder="Quel service recherchez-vous ?" initialCategoryId={initialCategoryId} initialSubcategoryId={initialSubcategoryId}/></label>
          <label className="ap-label">Zone d’intervention<LocationPicker variant="inline" value={zoneLoc} onChange={setZoneLoc} placeholder="Toutes les zones" className="mt-2"/></label>
          <label className="ap-label">Distance maximale (km)<input className="ap-input mt-2" type="number" min={0} value={maxDistance} onChange={e=>setMaxDistance(e.target.value)} placeholder="Sans limite"/></label>
          <button className="ap-secondary !px-3" onClick={()=>{if(!navigator.geolocation){toast.error('Localisation indisponible.');return}navigator.geolocation.getCurrentPosition(p=>setPosition({lat:p.coords.latitude,lng:p.coords.longitude}),()=>toast.error('Localisation refusée : distances calculées depuis votre quartier ou Libreville Centre.'),{timeout:10000})}}><LocateFixed size={17} className="shrink-0"/>Utiliser ma position</button>
