@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma migrate deploy && tsx scripts/import-locations.ts && tsx scripts/import-catalogue.ts && next build",
     "start": "next start",
     "lint": "eslint .",
     "test": "tsx scripts/marketplace-rules.test.ts && tsx scripts/payment-rules.test.ts && tsx scripts/location-rules.test.ts && tsx scripts/service-rules.test.ts",
