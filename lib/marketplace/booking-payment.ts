@@ -20,7 +20,8 @@ import {
 } from '../pawapay'
 import { isFinal, type PaymentKind, type TransactionStatus } from '../payment-types'
 import { publicCompletionProof } from './mission'
-import type { CompletionProof } from '@prisma/client'
+import { publicPayout } from './payouts'
+import type { CompletionProof, Payout } from '@prisma/client'
 
 const MAX_ATTEMPTS = 10
 const RECHECK_THROTTLE_MS = 20000
@@ -199,7 +200,7 @@ export async function handlePawaPayBookingDepositCallback(paymentAttemptId: stri
 export async function getBookingForViewer(viewerUserId: string, bookingId: string) {
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
-    include: { professional: { select: { userId: true } }, completionProof: true },
+    include: { professional: { select: { userId: true } }, completionProof: true, payout: true },
   })
   if (!booking) return null
   if (booking.userId !== viewerUserId && booking.professional.userId !== viewerUserId) return null
@@ -214,7 +215,7 @@ export async function listBookingsForProfessional(professionalId: string) {
   return prisma.booking.findMany({ where: { professionalId }, orderBy: { createdAt: 'desc' } })
 }
 
-export function publicBooking(b: Booking & { completionProof?: CompletionProof | null }) {
+export function publicBooking(b: Booking & { completionProof?: CompletionProof | null; payout?: Payout | null }) {
   return {
     id: b.id,
     code: b.code,
@@ -229,6 +230,7 @@ export function publicBooking(b: Booking & { completionProof?: CompletionProof |
     totalPrice: b.totalPrice,
     createdAt: b.createdAt.toISOString(),
     completionProof: b.completionProof ? publicCompletionProof(b.completionProof) : null,
+    payout: b.payout ? publicPayout(b.payout) : null,
   }
 }
 

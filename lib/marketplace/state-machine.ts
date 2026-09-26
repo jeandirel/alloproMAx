@@ -7,6 +7,10 @@ export type ServiceRequestStatus = 'draft' | 'open' | 'negotiating' | 'awarded' 
 export type OfferStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn' | 'expired' | 'superseded'
 export type ContactUnlockStatus = 'pending' | 'paid' | 'failed' | 'refunded'
 export type RefundStatus = 'requested' | 'approved' | 'rejected' | 'processing' | 'completed' | 'failed'
+// Reprend exactement les valeurs du modele Payout existant (prisma/schema.prisma) — pas d'etat
+// 'processing' distinct : comme ContactUnlock, l'entite reste dans son etat source pendant qu'une
+// tentative (PaymentAttempt) est en vol, et ne bascule qu'a la resolution finale de cette tentative.
+export type PayoutStatus = 'a_verser' | 'verse' | 'echoue'
 // Reprend exactement les valeurs déjà utilisées par le modèle Booking existant (voir lib/marketplace.ts
 // Status et prisma/schema.prisma) — le marketplace transactionnel réutilise le même champ `status`.
 export type BookingStatus =
@@ -57,6 +61,12 @@ const REFUND_TRANSITIONS: TransitionTable<RefundStatus> = {
   failed: ['processing'],
 }
 
+const PAYOUT_TRANSITIONS: TransitionTable<PayoutStatus> = {
+  a_verser: ['verse', 'echoue'],
+  verse: [],
+  echoue: ['a_verser'],
+}
+
 // Reservation reelle : acceptee/en_route/en_cours peuvent aussi être annulées (litige déjà géré
 // séparément par a_valider/validee). Repris des enchaînements déjà observés dans lib/payment-rules.ts
 // (authorizeRelease -> validee, authorizeRefund -> annulee) et étendu pour couvrir tous les statuts.
@@ -98,6 +108,10 @@ export function assertRefundTransition(from: RefundStatus, to: RefundStatus): vo
 
 export function assertBookingTransition(from: BookingStatus, to: BookingStatus): void {
   assertTransition('Booking', BOOKING_TRANSITIONS, from, to)
+}
+
+export function assertPayoutTransition(from: PayoutStatus, to: PayoutStatus): void {
+  assertTransition('Payout', PAYOUT_TRANSITIONS, from, to)
 }
 
 export function isTerminalOfferStatus(status: OfferStatus): boolean {

@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma'
 import { handlePawaPayContactUnlockCallback } from '@/lib/marketplace/contact-unlock'
 import { handlePawaPayBookingDepositCallback } from '@/lib/marketplace/booking-payment'
 import { handlePawaPayRefundCallback } from '@/lib/marketplace/refunds'
+import { handlePawaPayPayoutCallback } from '@/lib/marketplace/payouts'
 import { isFinal } from '@/lib/payment-types'
 
 const callback = z.object({ depositId: z.string().uuid().optional(), payoutId: z.string().uuid().optional(), refundId: z.string().uuid().optional() })
@@ -42,8 +43,6 @@ export async function POST(req: Request) {
     if (!id || (body.refundId && body.payoutId)) return new NextResponse(null, { status: 400, headers })
     const attempt = await prisma.paymentAttempt.findUnique({ where: { id } })
     if (!attempt) return new NextResponse(null, { status: 200, headers })
-    // Le versement au professionnel (kind='payout', Phase 7) reste un no-op 200 jusqu'à son
-    // implémentation ; acompte, remboursement et déblocage de contact sont câblés ici.
     if (attempt.contactUnlockId) {
       const result = await handlePawaPayContactUnlockCallback(attempt.id)
       return new NextResponse(null, { status: result && isFinal(result.attempt.status) ? 200 : 503, headers })
@@ -54,6 +53,10 @@ export async function POST(req: Request) {
     }
     if (attempt.kind === 'refund') {
       const result = await handlePawaPayRefundCallback(attempt.id)
+      return new NextResponse(null, { status: result && isFinal(result.attempt.status) ? 200 : 503, headers })
+    }
+    if (attempt.kind === 'payout') {
+      const result = await handlePawaPayPayoutCallback(attempt.id)
       return new NextResponse(null, { status: result && isFinal(result.attempt.status) ? 200 : 503, headers })
     }
     return new NextResponse(null, { status: 200, headers })

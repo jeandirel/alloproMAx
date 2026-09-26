@@ -13,6 +13,7 @@ import {
   assertContactUnlockTransition,
   assertRefundTransition,
   assertBookingTransition,
+  assertPayoutTransition,
   isTerminalOfferStatus,
   isTerminalServiceRequestStatus,
 } from '../lib/marketplace/state-machine'
@@ -115,8 +116,15 @@ async function main() {
   assert.throws(() => assertBookingTransition('payee', 'validee'), /invalide/)
   assert.throws(() => assertBookingTransition('annulee', 'acceptee'), /invalide/)
 
+  // Payout : un échec PSP peut être retenté depuis "a_verser" (le professionnel resoumet), jamais depuis "verse".
+  assertPayoutTransition('a_verser', 'verse')
+  assertPayoutTransition('a_verser', 'echoue')
+  assertPayoutTransition('echoue', 'a_verser')
+  assert.throws(() => assertPayoutTransition('verse', 'echoue'), /invalide/)
+  assert.throws(() => assertPayoutTransition('echoue', 'verse'), /invalide/)
+
   console.log(
-    'MARKETPLACE (machine à états) : PASS — ServiceRequest, Offer, ContactUnlock, Refund, Booking — transitions valides, invalides et idempotentes.',
+    'MARKETPLACE (machine à états) : PASS — ServiceRequest, Offer, ContactUnlock, Refund, Booking, Payout — transitions valides, invalides et idempotentes.',
   )
 
   // pawaPay réel (PaymentAttempt) : environnement distinct de la démo, autorise 'production'.
