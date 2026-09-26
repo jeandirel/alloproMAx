@@ -6,7 +6,8 @@
 import { randomUUID } from 'node:crypto'
 import { Prisma, type PaymentAttempt, type Booking } from '@prisma/client'
 import { prisma } from '../prisma'
-import { assertBookingTransition, type BookingStatus } from './state-machine'
+import { isManagedPaymentsEnabled } from './flags'
+import { assertBookingTransition } from './state-machine'
 import {
   normalizePhone,
   pawaPayEnvironment,
@@ -18,6 +19,8 @@ import {
   type PawaPayTransactionLike,
 } from '../pawapay'
 import { isFinal, type PaymentKind, type TransactionStatus } from '../payment-types'
+import { publicCompletionProof } from './mission'
+import type { CompletionProof } from '@prisma/client'
 
 const MAX_ATTEMPTS = 10
 const RECHECK_THROTTLE_MS = 20000
@@ -42,6 +45,7 @@ function toPawaPayTransactionLike(attempt: PaymentAttempt): PawaPayTransactionLi
 // Cree (ou reutilise) la tentative de paiement pawaPay pour l'acompte d'une Booking — miroir de
 // lib/marketplace/contact-unlock.ts::prepareContactUnlockPayment.
 export async function prepareBookingDepositPayment(params: { bookingId: string; userId: string; method: 'airtel' | 'moov'; phone: string }) {
+  if (!isManagedPaymentsEnabled()) throw new Error('Le paiement d’acompte en ligne est temporairement indisponible.')
   const environment = pawaPayEnvironment()
   if (environment === 'mock') throw new Error('Paiement temporairement indisponible : configuration pawaPay manquante.')
   const options = await activeDepositOptions(environment)
@@ -193,7 +197,10 @@ export async function handlePawaPayBookingDepositCallback(paymentAttemptId: stri
 }
 
 export async function getBookingForViewer(viewerUserId: string, bookingId: string) {
-  const booking = await prisma.booking.findUnique({ where: { id: bookingId }, include: { professional: { select: { userId: true } } } })
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    include: { professional: { select: { userId: true } }, completionProof: true },
+  })
   if (!booking) return null
   if (booking.userId !== viewerUserId && booking.professional.userId !== viewerUserId) return null
   return booking
@@ -207,7 +214,7 @@ export async function listBookingsForProfessional(professionalId: string) {
   return prisma.booking.findMany({ where: { professionalId }, orderBy: { createdAt: 'desc' } })
 }
 
-export function publicBooking(b: Booking) {
+export function publicBooking(b: Booking & { completionProof?: CompletionProof | null }) {
   return {
     id: b.id,
     code: b.code,
@@ -221,6 +228,7 @@ export function publicBooking(b: Booking) {
     serviceFee: b.serviceFee,
     totalPrice: b.totalPrice,
     createdAt: b.createdAt.toISOString(),
+    completionProof: b.completionProof ? publicCompletionProof(b.completionProof) : null,
   }
 }
 

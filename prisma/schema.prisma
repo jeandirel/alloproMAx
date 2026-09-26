@@ -981,6 +981,7 @@ model MarketplaceSettings {
   id                     Int      @id @default(1)
   platformCommissionBps  Int      @default(700) // 7% par defaut
   contactUnlockFeeAmount Int      @default(500) // FCFA, prix par defaut d'un deblocage de contact
+  autoCompleteHours      Int      @default(48) // delai avant validation automatique d'une CompletionProof non contestee
   currency               String   @default("XAF")
   version                Int      @default(1) // incremente a chaque modification, tracabilite uniquement
   updatedAt              DateTime @updatedAt
