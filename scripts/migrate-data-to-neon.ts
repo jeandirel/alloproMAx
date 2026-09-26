@@ -129,7 +129,7 @@ async function sourceTableColumns(source: any, tableName: string): Promise<Set<s
     SELECT column_name FROM information_schema.columns
     WHERE table_schema = 'public' AND table_name = ${tableName}
   `
-  return new Set(rows.map((r) => r.column_name))
+  return new Set(rows.map((r: { column_name: string }) => r.column_name))
 }
 
 // Parents (models with no outgoing required scalar-FK dependency, or whose dependencies are already
