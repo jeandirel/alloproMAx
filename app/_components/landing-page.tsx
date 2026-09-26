@@ -1,20 +1,18 @@
 'use client'
 
 import Link from 'next/link'
-import Image from '@/components/smart-image'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
-  BadgeCheck, ShieldCheck,
-  Star, ArrowRight,
-  ClipboardList, UserCheck, CreditCard,
+  BadgeCheck, ClipboardList, MessageCircle,
+  ArrowRight, UserCheck, CreditCard, MapPinned,
 } from 'lucide-react'
 import { SearchBar } from '@/components/search-bar'
 import { LocationPicker, type LocationPickerValue } from '@/components/location-picker'
 import { ProfessionalCard } from '@/components/professional-card'
-import { CounterAnimation } from '@/components/counter-animation'
 import { CategoryGrid, resolveCategoryIconByName } from '@/components/category-grid'
-import { professionals } from '@/lib/data'
+import { SiteFooter } from '@/components/site-footer'
+import type { Professional } from '@/lib/data'
 
 const CATEGORIES_PREVIEW_COUNT = 8
 interface CategoryOption { id: string; name: string; slug: string }
@@ -25,11 +23,12 @@ const fadeUp = {
 }
 
 export function LandingPage() {
-  const featuredPros = professionals.filter((p) => p.enLigne).slice(0, 3)
-  const [zoneLoc, setZoneLoc] = useState<LocationPickerValue | null>(null)
-  const zone = zoneLoc?.displayName || 'Libreville Centre'
+  const [heroLoc, setHeroLoc] = useState<LocationPickerValue | null>(null)
+  const [panelLoc, setPanelLoc] = useState<LocationPickerValue | null>(null)
   const [categories, setCategories] = useState<CategoryOption[]>([])
   const [showAllCategories, setShowAllCategories] = useState(false)
+  const [professionals, setProfessionals] = useState<Professional[]>([])
+  const [prosLoading, setProsLoading] = useState(true)
 
   useEffect(() => {
     let cancelled = false
@@ -40,6 +39,26 @@ export function LandingPage() {
     return () => { cancelled = true }
   }, [])
 
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/professionals?limit=3')
+      .then((r) => r.json())
+      .then((d) => { if (!cancelled) setProfessionals(d.professionals ?? []) })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setProsLoading(false) })
+    return () => { cancelled = true }
+  }, [])
+
+  function goToRecherche(loc: LocationPickerValue | null) {
+    if (!loc) return
+    const params = new URLSearchParams()
+    if (loc.displayName) params.set('zone', loc.displayName)
+    if (loc.provinceId) params.set('provinceId', loc.provinceId)
+    if (loc.cityId) params.set('cityId', loc.cityId)
+    if (loc.neighborhoodId) params.set('neighborhoodId', loc.neighborhoodId)
+    window.location.href = `/recherche?${params.toString()}`
+  }
+
   const visibleCategories = showAllCategories ? categories : categories.slice(0, CATEGORIES_PREVIEW_COUNT)
 
   return (
@@ -47,8 +66,9 @@ export function LandingPage() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-border/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-[76px] flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-1.5">
-            <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-emerald-dark font-display">Allo-Pro</span>
+          <Link href="/" className="flex items-center gap-2">
+            <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-emerald-dark font-display">Allo Pro</span>
+            <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Bêta</span>
           </Link>
           <div className="flex items-center gap-2 sm:gap-6">
             <Link href="/login" className="inline-flex min-h-11 items-center text-xs sm:text-sm font-semibold text-foreground hover:text-emerald-dark transition-colors">
@@ -64,27 +84,26 @@ export function LandingPage() {
         </div>
       </header>
 
-      <p className="text-center text-xs bg-amber-50 text-amber-950 px-4 py-2">Version de démonstration · Profils, avis et chiffres fictifs · Aucun paiement réel</p>
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 to-background px-4 py-10 sm:px-6 sm:py-16 lg:py-20">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
-          <div className="min-w-0">
-            <p className="ap-eyebrow mb-5 flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-gold"/>Le savoir-faire d’ici, pour vous</p>
-            <h1 className="max-w-xl text-balance font-display text-4xl font-extrabold leading-[1.12] tracking-tight text-foreground sm:text-5xl lg:text-6xl">Un pro de <span className="text-primary">confiance.</span><br/>Une maison sereine.</h1>
-            <p className="mt-6 max-w-lg text-base leading-7 text-muted-foreground sm:text-lg">Le bon professionnel, au bon moment. Découvrez des services à domicile et des professionnels vérifiés à Libreville.</p>
-            <div className="mt-7 rounded-3xl border border-border/40 bg-white p-3 shadow-lg sm:p-4">
-              <SearchBar zone={zone}/>
-              <div className="mt-3">
-                <LocationPicker variant="inline" value={zoneLoc} onChange={setZoneLoc} placeholder="Votre quartier au Gabon"/>
-              </div>
+        <div className="mx-auto max-w-3xl text-center">
+          <h1 className="text-balance font-display text-3xl font-extrabold leading-[1.15] tracking-tight text-foreground sm:text-5xl">
+            Trouvez un professionnel près de chez vous au Gabon
+          </h1>
+          <p className="mt-5 text-balance text-base leading-7 text-muted-foreground sm:text-lg">
+            Plomberie, électricité, ménage, coiffure, mécanique, informatique et bien plus. Recherchez un prestataire selon votre besoin et votre localisation.
+          </p>
+          <div className="mt-7 rounded-3xl border border-border/40 bg-white p-3 text-left shadow-lg sm:p-5">
+            <SearchBar label="Quel service recherchez-vous ?" zone={heroLoc?.displayName || ''}/>
+            <div className="mt-3">
+              <label className="ap-label mb-1.5 block">Ville ou quartier</label>
+              <LocationPicker variant="inline" value={heroLoc} onChange={setHeroLoc} placeholder="Ville ou quartier au Gabon"/>
             </div>
-            <div className="mt-6 flex flex-wrap gap-x-5 gap-y-3 text-xs font-medium text-muted-foreground"><span className="flex items-center gap-1.5"><BadgeCheck size={16} className="text-primary"/>Profils vérifiés</span><span className="flex items-center gap-1.5"><ClipboardList size={16} className="text-primary"/>Tarifs détaillés</span><span className="flex items-center gap-1.5"><CreditCard size={16} className="text-primary"/>Paiement de test</span></div>
           </div>
-          <div className="relative min-w-0 rounded-[2rem] bg-primary/10 p-4 sm:p-6">
-            <div className="mb-4 flex items-center justify-between gap-3"><span className="text-xs font-bold uppercase tracking-widest text-primary">Des talents près de vous</span><ArrowRight size={18} className="text-primary"/></div>
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">{featuredPros.slice(0,2).map((pro,i)=><Link key={pro.id} href={`/professionnel/${pro.id}`} className={`group block overflow-hidden rounded-2xl bg-white shadow-sm ${i===1?'mt-8':'mb-8'}`}><div className="relative aspect-[4/5] overflow-hidden bg-muted"><Image src={pro.photo} alt={`Portrait illustratif de ${pro.name}`} fill priority className="object-cover transition-transform duration-300 motion-safe:group-hover:scale-105" sizes="(max-width: 640px) 40vw, (max-width: 1024px) 42vw, 240px"/></div><div className="p-3 sm:p-4"><p className="text-xs font-semibold text-primary">{pro.metier}</p><p className="mt-1 font-display text-sm font-bold leading-snug sm:text-base">{pro.name}</p><span className="mt-2 inline-flex items-center gap-1 text-xs text-muted-foreground"><BadgeCheck size={14} className="shrink-0 text-primary"/>Profil vérifié · Démo</span></div></Link>)}</div>
-            <div className="flex items-center gap-3 rounded-2xl bg-primary p-4 text-white"><ShieldCheck size={25} className="shrink-0"/><div><p className="text-sm font-semibold">Votre quotidien mérite du soin.</p><p className="mt-1 text-xs leading-relaxed text-white/85">Comparez, échangez, puis réservez.</p></div></div>
-            <p className="mt-3 text-center text-xs text-muted-foreground">Portraits illustratifs · Professionnels fictifs</p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-xs font-medium text-muted-foreground">
+            <span className="flex items-center gap-1.5"><BadgeCheck size={16} className="text-primary"/>Professionnels par ville et quartier</span>
+            <span className="flex items-center gap-1.5"><ClipboardList size={16} className="text-primary"/>Tarifs indicatifs affichés</span>
+            <span className="flex items-center gap-1.5"><MessageCircle size={16} className="text-primary"/>Contact direct avec le professionnel</span>
           </div>
         </div>
       </section>
@@ -113,14 +132,14 @@ export function LandingPage() {
       </section>
 
       {/* Comment ça marche */}
-      <section className="py-10 sm:py-16 px-4 sm:px-6 bg-white">
+      <section id="comment-ca-marche" className="py-10 sm:py-16 px-4 sm:px-6 bg-white scroll-mt-20">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl sm:text-3xl tracking-tight font-bold text-foreground font-display text-center mb-8">Comment ça marche</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { icon: ClipboardList, title: 'Décrivez votre besoin', desc: 'Sélectionnez un service et décrivez précisément ce dont vous avez besoin.', step: '1' },
-              { icon: UserCheck, title: 'Choisissez votre pro', desc: 'Comparez les profils, avis et tarifs pour trouver le professionnel idéal.', step: '2' },
-              { icon: CreditCard, title: 'Découvrez le paiement de test', desc: 'Simulez votre règlement Mobile Money. Le versement est autorisé après validation, hors litige.', step: '3' },
+              { icon: ClipboardList, title: 'Décrivez votre besoin', desc: 'Sélectionnez un service et précisez votre localisation.', step: '1' },
+              { icon: UserCheck, title: 'Choisissez votre pro', desc: 'Comparez les profils disponibles près de chez vous.', step: '2' },
+              { icon: CreditCard, title: 'Échangez et convenez du tarif', desc: 'Discutez directement avec le professionnel avant de valider la prestation.', step: '3' },
             ].map((s, i) => (
               <motion.div
                 key={s.step}
@@ -143,89 +162,49 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Chiffres de démonstration */}
+      {/* Professionnels disponibles / état vide crédible */}
       <section className="py-10 sm:py-16 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          <p className="mb-5 text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground">Chiffres illustratifs de démonstration</p><div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { value: 1200, suffix: '+', label: 'Professionnels vérifiés' },
-              { value: 8500, suffix: '+', label: 'Missions réalisées' },
-              { value: 4.8, suffix: '/5', label: 'Note moyenne' },
-              { value: 7, suffix: '', label: 'Provinces couvertes' },
-            ].map((stat) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-                className="bg-white rounded-xl p-4 text-center shadow-sm border border-border/50"
-              >
-                <div className="text-2xl md:text-3xl font-bold text-emerald-dark font-display">
-                  <CounterAnimation target={stat.value} suffix={stat.suffix} />
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
-              </motion.div>
-            ))}
-          </div>
+          <h2 className="text-2xl sm:text-3xl tracking-tight font-bold text-foreground font-display text-center mb-6">Professionnels disponibles</h2>
+          {!prosLoading && professionals.length === 0 && (
+            <div className="mx-auto max-w-lg rounded-3xl border border-border/50 bg-white p-8 text-center">
+              <p className="text-sm text-muted-foreground">Aucun professionnel disponible dans cette zone pour le moment.</p>
+              <Link href="/signup" className="ap-button mt-5 inline-flex">Devenir l&apos;un des premiers professionnels</Link>
+            </div>
+          )}
+          {professionals.length > 0 && (
+            <div className="grid md:grid-cols-3 gap-4">
+              {professionals.map((pro, i) => (
+                <motion.div
+                  key={pro.id}
+                  custom={i}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  variants={fadeUp}
+                >
+                  <ProfessionalCard pro={pro}/>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Professionnels mis en avant */}
+      {/* Localisation */}
       <section className="py-10 sm:py-16 px-4 sm:px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl tracking-tight font-bold text-foreground font-display text-center mb-6">Professionnels recommandés</h2>
-          <div className="grid md:grid-cols-3 gap-4">
-            {featuredPros.map((pro, i) => (
-              <motion.div
-                key={pro.id}
-                custom={i}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeUp}
-              >
-                <ProfessionalCard pro={pro}/>
-              </motion.div>
-            ))}
+        <div className="mx-auto max-w-xl">
+          <div className="mb-6 text-center">
+            <MapPinned className="mx-auto mb-3 h-8 w-8 text-primary" />
+            <h2 className="text-2xl sm:text-3xl tracking-tight font-bold text-foreground font-display">Où avez-vous besoin d&apos;un professionnel ?</h2>
           </div>
-        </div>
-      </section>
-
-      {/* Témoignages */}
-      <section className="py-10 sm:py-16 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl tracking-tight font-bold text-foreground font-display text-center mb-6">Des exemples d’expériences clients</h2>
-          <div className="grid md:grid-cols-3 gap-4">
-            {[
-              { nom: 'Estelle Mouanga', photo: 'https://randomuser.me/api/portraits/women/45.jpg', quartier: 'Akanda', note: 5, texte: 'Service impeccable ! Mon plombier est arrivé en 25 minutes et a réparé la fuite rapidement. Merci Allo-Pro !' },
-              { nom: 'Olivier Mba', photo: 'https://randomuser.me/api/portraits/men/52.jpg', quartier: 'Libreville Centre', note: 5, texte: 'Enfin une plateforme fiable au Gabon. Les professionnels sont vérifiés et compétents. Je recommande.' },
-              { nom: 'Patricia Engone', photo: 'https://randomuser.me/api/portraits/women/62.jpg', quartier: 'Owendo', note: 4, texte: 'Très pratique pour le ménage à domicile. Marie-Claire fait un travail exceptionnel chaque semaine.' },
-            ].map((t, i) => (
-              <motion.div
-                key={t.nom}
-                custom={i}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeUp}
-                className="bg-white rounded-3xl p-6 shadow-sm border border-border/40"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">{t.nom.split(" ").map(n=>n[0]).join("")}</span>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">{t.nom}</p>
-                    <p className="text-xs text-muted-foreground">{t.quartier}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-0.5 mb-2">
-                  {Array.from({ length: 5 }).map((_, si) => (
-                    <Star key={si} className={`w-3.5 h-3.5 ${si < t.note ? 'fill-gold text-gold' : 'fill-gray-200 text-gray-200'}`} />
-                  ))}
-                </div>
-                <p className="text-sm text-muted-foreground leading-7">{t.texte}</p><p className="mt-3 text-xs text-muted-foreground">Témoignage fictif de démonstration</p>
-              </motion.div>
-            ))}
+          <div className="rounded-3xl border border-border/50 bg-background p-5 sm:p-6">
+            <LocationPicker
+              variant="panel"
+              value={panelLoc}
+              onChange={(loc) => { setPanelLoc(loc); goToRecherche(loc) }}
+              submitLabel="Voir les professionnels"
+            />
           </div>
         </div>
       </section>
@@ -235,31 +214,18 @@ export function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="ap-home-hero bg-primary rounded-[2rem] p-8 md:p-12 text-center text-white">
             <h2 className="text-xl md:text-2xl font-bold font-display mb-2">Vous êtes un professionnel ?</h2>
-            <p className="text-sm text-white/80 mb-5">Présentez votre savoir-faire et découvrez comment recevoir des missions près de chez vous.</p>
+            <p className="text-sm text-white/80 mb-5">Présentez votre savoir-faire et recevez des demandes de clients près de chez vous.</p>
             <Link
               href="/signup"
               className="inline-flex items-center gap-2 bg-gold hover:bg-gold-dark text-slate-950 font-semibold px-6 py-3 rounded-xl transition-colors"
             >
-              Rejoindre Allo-Pro <ArrowRight className="w-4 h-4" />
+              Créer mon profil professionnel <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-8 px-4 bg-white border-t border-border">
-        <div className="max-w-6xl mx-auto text-center">
-          <span className="text-lg font-bold text-emerald-dark font-display">Allo-Pro</span>
-          <p className="text-xs text-muted-foreground mt-1">Le bon professionnel, au bon moment.</p>
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 mt-4 text-sm text-muted-foreground">
-            <Link href="/contact" className="hover:text-emerald-dark transition-colors">Contact</Link>
-            <Link href="/cgu" className="hover:text-emerald-dark transition-colors">CGU de la démo</Link>
-            <Link href="/confidentialite" className="hover:text-emerald-dark transition-colors">Confidentialité</Link>
-            <Link href="/contact" className="hover:text-emerald-dark transition-colors">Réseaux sociaux</Link>
-          </div>
-          <p className="text-xs text-muted-foreground mt-4">© 2026 Allo-Pro · Pensé pour le Gabon</p>
-        </div>
-      </footer>
+      <SiteFooter/>
     </div>
   )
 }
