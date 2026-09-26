@@ -5,10 +5,11 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { Mail, Lock, User, Eye, EyeOff, Loader2, Search, Wrench } from 'lucide-react'
+import { PhoneLogin } from '@/components/phone-login'
 
 type SignupRole = 'user' | 'professional'
 
-export function SignupClient() {
+export function SignupClient({ googleAuthEnabled }: { googleAuthEnabled: boolean }) {
   const router = useRouter()
   const [role, setRole] = useState<SignupRole | null>(null)
   const [name, setName] = useState('')
@@ -112,6 +113,17 @@ export function SignupClient() {
             <div className="bg-destructive/10 text-destructive text-xs p-3 rounded-lg mb-4 text-center">{error}</div>
           )}
 
+          <PhoneLogin role={role} onSuccessHref={`/onboarding?role=${role === 'professional' ? 'professionnel' : 'client'}`} />
+          {googleAuthEnabled && (
+            <button
+              type="button"
+              className="ap-secondary w-full mb-6"
+              onClick={() => signIn('google', { callbackUrl: `/onboarding?role=${role === 'professional' ? 'professionnel' : 'client'}` })}
+            >
+              Continuer avec Google
+            </button>
+          )}
+          <h2 className="text-sm font-semibold mb-3">Ou créer un compte avec e-mail</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="text-xs font-medium text-foreground mb-1 block">Nom complet</label>

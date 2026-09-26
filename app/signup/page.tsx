@@ -1,4 +1,4 @@
-import { auth } from '@/auth'
+import { auth, isGoogleAuthEnabled } from '@/auth'
 import { redirect } from 'next/navigation'
 import { SignupClient } from './signup-client'
 
@@ -14,5 +14,5 @@ export const metadata = {
 export default async function SignupPage() {
   const session = await auth()
   if (session?.user) redirect('/accueil')
-  return <SignupClient />
+  return <SignupClient googleAuthEnabled={isGoogleAuthEnabled()} />
 }
