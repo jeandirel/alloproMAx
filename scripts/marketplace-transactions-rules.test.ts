@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { randomUUID } from 'node:crypto'
 import {
   computePlatformFee,
   computeProfessionalNet,
@@ -15,6 +16,12 @@ import {
   isTerminalOfferStatus,
   isTerminalServiceRequestStatus,
 } from '../lib/marketplace/state-machine'
+import {
+  pawaPayEnvironment,
+  initiatePawaPayTransaction,
+  checkPawaPayStatus,
+  type PawaPayTransactionLike,
+} from '../lib/pawapay'
 
 async function main() {
   // Exemple chiffré de la directive produit : 20000 FCFA bruts, commission 700 bps (7%).
@@ -110,6 +117,68 @@ async function main() {
 
   console.log(
     'MARKETPLACE (machine à états) : PASS — ServiceRequest, Offer, ContactUnlock, Refund, Booking — transitions valides, invalides et idempotentes.',
+  )
+
+  // pawaPay réel (PaymentAttempt) : environnement distinct de la démo, autorise 'production'.
+  const originalEnv = process.env.PAWAPAY_ENVIRONMENT
+  const originalToken = process.env.PAWAPAY_API_TOKEN
+  const originalFetch = globalThis.fetch
+  try {
+    delete process.env.PAWAPAY_API_TOKEN
+    assert.equal(pawaPayEnvironment(), 'mock') // pas de jeton -> jamais de vrai appel réseau
+    process.env.PAWAPAY_API_TOKEN = randomUUID()
+    process.env.PAWAPAY_ENVIRONMENT = 'sandbox'
+    assert.equal(pawaPayEnvironment(), 'sandbox')
+    process.env.PAWAPAY_ENVIRONMENT = 'production'
+    assert.equal(pawaPayEnvironment(), 'production')
+    process.env.PAWAPAY_ENVIRONMENT = 'mock'
+    assert.equal(pawaPayEnvironment(), 'mock')
+
+    const t: PawaPayTransactionLike = {
+      id: randomUUID(),
+      kind: 'deposit',
+      amount: 500,
+      currency: 'XAF',
+      clientReferenceId: randomUUID(),
+      phoneNumber: '24174345678',
+      provider: 'AIRTEL_GAB',
+      depositId: null,
+    }
+    let calledUrl = ''
+    globalThis.fetch = async (url, options) => {
+      calledUrl = String(url)
+      const payload = JSON.parse(options!.body as string)
+      assert.equal(payload.clientReferenceId, t.clientReferenceId) // jamais missionId : forme générique
+      assert.equal(payload.depositId, t.id)
+      return Response.json({ depositId: t.id, status: 'ACCEPTED' })
+    }
+    assert.equal((await initiatePawaPayTransaction(t, 'production')).status, 'ACCEPTED')
+    assert(calledUrl.startsWith('https://api.pawapay.io/v2/')) // hôte production, sans le sous-domaine sandbox
+    assert.equal((await initiatePawaPayTransaction(t, 'sandbox')).status, 'ACCEPTED')
+    assert(calledUrl.startsWith('https://api.sandbox.pawapay.io/v2/'))
+
+    globalThis.fetch = async () =>
+      Response.json({
+        status: 'FOUND',
+        data: {
+          depositId: t.id,
+          status: 'COMPLETED',
+          amount: '500.00',
+          currency: 'XAF',
+          payer: { type: 'MMO', accountDetails: { phoneNumber: t.phoneNumber, provider: t.provider } },
+        },
+      })
+    assert.equal((await checkPawaPayStatus(t, 'production'))?.status, 'COMPLETED')
+  } finally {
+    globalThis.fetch = originalFetch
+    if (originalEnv === undefined) delete process.env.PAWAPAY_ENVIRONMENT
+    else process.env.PAWAPAY_ENVIRONMENT = originalEnv
+    if (originalToken === undefined) delete process.env.PAWAPAY_API_TOKEN
+    else process.env.PAWAPAY_API_TOKEN = originalToken
+  }
+
+  console.log(
+    'MARKETPLACE (pawaPay réel) : PASS — environnement mock/sandbox/production, hôte par environnement, référence générique, statut vérifié.',
   )
 }
 
