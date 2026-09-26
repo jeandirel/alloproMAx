@@ -19,13 +19,37 @@ model User {
   password      String?
   image         String?
   role          String    @default("user")
-  phone         String?
+  phone         String?   @unique
   country       String    @default("GA")
   locale        String    @default("fr")
   timezone      String    @default("Africa/Libreville")
   suspended     Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  // ===== Cycle de vie du compte (additif — section account-management) =====
+  // active | paused | suspended | deletion_requested | deleted
+  accountStatus       String    @default("active")
+  pausedAt            DateTime?
+  suspendedAt         DateTime?
+  suspensionReason    String?   @db.Text
+  suspendedById       String?
+  deletionRequestedAt DateTime?
+  deletionScheduledAt DateTime?
+  deletedAt           DateTime?
+  // Libellé du provider utilisé à la création du compte (google | phone | credentials) —
+  // valeur d'affichage uniquement ; la source de vérité multi-provider reste le modèle Account.
+  authProvider        String?
+  phoneVerifiedAt     DateTime?
+  lastLoginAt         DateTime?
+
+  // Préférences de notification et consentements — booléens simples, cohérents avec le style
+  // existant (suspended/online) plutôt qu'un nouveau modèle pour un besoin encore modeste.
+  marketingConsent     Boolean @default(false)
+  notifyBookingUpdates Boolean @default(true)
+  notifyMessages       Boolean @default(true)
+  notifySecurity       Boolean @default(true)
+  notifyMarketing      Boolean @default(false)
 
   accounts       Account[]
   sessions       Session[]
@@ -46,11 +70,18 @@ model User {
   auditLogs      AuditLog[]
   invoices       Invoice[]
 
+  suspendedBy                 User?          @relation("UserSuspendedBy", fields: [suspendedById], references: [id])
+  suspensionsMade             User[]         @relation("UserSuspendedBy")
+  professionalSuspensionsMade Professional[] @relation("ProfessionalSuspendedBy")
+
   locationSuggestionsSubmitted LocationSuggestion[] @relation("LocationSuggestionSubmitter")
   locationSuggestionsReviewed  LocationSuggestion[] @relation("LocationSuggestionReviewer")
 
   serviceSuggestionsSubmitted ServiceSuggestion[] @relation("ServiceSuggestionSubmitter")
   serviceSuggestionsReviewed  ServiceSuggestion[] @relation("ServiceSuggestionReviewer")
+
+  @@index([accountStatus])
+  @@index([deletionScheduledAt])
 }
 
 model Account {
@@ -71,12 +102,23 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
+// Stratégie NextAuth restée 'jwt' (voir auth.ts) : un provider Credentials ne passe jamais par le
+// chemin "session base de données" de l'adapter, quelle que soit la stratégie configurée — cette
+// table est donc gérée à la main dans le callback `jwt`, pas par l'adapter, et sert de source de
+// vérité pour "Sécurité → Appareils connectés" (lister/révoquer un appareil, tout déconnecter).
+// userAgent/ipAddress/lastUsedAt sont renseignés directement depuis auth.ts.
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
+  userAgent    String?
+  ipAddress    String?
+  createdAt    DateTime @default(now())
+  lastUsedAt   DateTime @default(now()) @updatedAt
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model VerificationToken {
@@ -165,6 +207,22 @@ model DemoOtp {
   used      Boolean  @default(false)
 }
 
+// Authentification téléphone RÉELLE (production) — distincte de DemoOtp ci-dessus qui reste la
+// simulation investisseur (aucun SMS, compte aléatoire à chaque essai). Ce modèle porte le numéro
+// et alimente le CredentialsProvider('phone') dans auth.ts : find-or-create d'un vrai User par
+// numéro normalisé E.164.
+model PhoneOtp {
+  id        String   @id @default(cuid())
+  phone     String
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([phone])
+}
+
 // =========================================================================
 // CATALOGUE RELATIONNEL (remplace le clonage de lib/data.ts par utilisateur)
 // =========================================================================
@@ -250,7 +308,21 @@ model Professional {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
+  // ===== Cycle de vie de l'activité professionnelle (additif) =====
+  // Distinct de kycStatus (vérification d'identité) et de `suspended` (déjà existant, imposé par
+  // un admin) : `paused` est une mise en pause VOLONTAIRE par le professionnel lui-même — masque
+  // le profil des résultats publics sans toucher au compte utilisateur ni à l'historique.
+  paused           Boolean   @default(false)
+  pausedAt         DateTime?
+  suspendedAt      DateTime?
+  suspensionReason String?   @db.Text
+  suspendedById    String?
+  // Suppression du PROFIL professionnel uniquement (distinct de User.deletedAt qui supprime tout
+  // le compte) — conserve la ligne pour préserver reviews/bookings/payouts existants (FK Restrict).
+  deletedAt        DateTime?
+
   user          User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  suspendedBy   User?                  @relation("ProfessionalSuspendedBy", fields: [suspendedById], references: [id])
   category      Category               @relation(fields: [categoryId], references: [id])
   services      Service[]
   documents     ProfessionalDocument[]
@@ -275,6 +347,8 @@ model Professional {
   @@index([provinceId])
   @@index([cityId])
   @@index([neighborhoodId])
+  @@index([paused])
+  @@index([deletedAt])
 }
 
 model Service {
