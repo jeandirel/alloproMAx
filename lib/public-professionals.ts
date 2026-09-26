@@ -139,6 +139,8 @@ export async function getPublicProfessionals(filters: PublicProfessionalFilters 
   try {
     const where: Prisma.ProfessionalWhereInput = {
       suspended: false,
+      paused: false,
+      deletedAt: null,
       ...(categoryId ? { categoryId } : {}),
       ...(provinceId ? { provinceId } : {}),
       ...(cityId ? { cityId } : {}),
@@ -172,7 +174,7 @@ export async function getPublicProfessionals(filters: PublicProfessionalFilters 
 export async function getPublicProfessionalById(id: string): Promise<Professional | null> {
   try {
     const p = await prisma.professional.findUnique({ where: { id }, include: professionalInclude })
-    if (!p || p.suspended) return null
+    if (!p || p.suspended || p.paused || p.deletedAt) return null
     const missionCounts = await loadMissionCounts([p.id])
     return mapProfessional(p, missionCounts.get(p.id) ?? 0)
   } catch (error) {
