@@ -3,11 +3,11 @@ import { redirect } from 'next/navigation'
 import { LandingPage } from './_components/landing-page'
 
 export const metadata = {
-  title: 'Allo-Pro — Trouvez un professionnel vérifié près de chez vous',
-  description: 'Réservez des professionnels vérifiés (plomberie, électricité, ménage et plus) à Libreville et partout au Gabon, et payez en toute sécurité sur Allo-Pro.',
+  title: 'Allo Pro — Trouvez un professionnel près de chez vous au Gabon',
+  description: 'Plomberie, électricité, ménage, coiffure, mécanique, informatique et bien plus. Recherchez un prestataire selon votre besoin et votre localisation, partout au Gabon.',
   openGraph: {
-    title: 'Allo-Pro — Trouvez un professionnel vérifié près de chez vous',
-    description: 'Réservez des professionnels vérifiés à Libreville et partout au Gabon, et payez en toute sécurité sur Allo-Pro.',
+    title: 'Allo Pro — Trouvez un professionnel près de chez vous au Gabon',
+    description: 'Recherchez un prestataire selon votre besoin et votre localisation, partout au Gabon.',
   },
 }
 
