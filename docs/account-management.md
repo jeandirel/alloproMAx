@@ -195,11 +195,14 @@ merge/déploiement production :
 
 ## 12. Points ouverts
 
-- **Connectivité DB résolue** (voir §13 pour le diagnostic complet) : la base réellement utilisée
-  par l'application (`db.prisma.io`, Prisma Postgres) est joignable et fonctionnelle ; c'est
-  l'ancienne variable `DATABASE_URL` du fichier `.env` (base de sandbox de développement Abacus.AI,
-  réseau privé) qui ne l'était pas. La migration a été auditée et pré-validée (§13.3/§13.4) mais
-  **n'a pas été appliquée** : `prisma migrate deploy` reste une action volontaire à exécuter
+- **Connectivité DB résolue, y compris pour le CLI Prisma lancé nu** (voir §13 pour le diagnostic
+  complet) : la base réellement utilisée par l'application (`db.prisma.io`, Prisma Postgres) est
+  joignable et fonctionnelle. Deux causes distinctes du P1001 ont été corrigées : l'ordre de
+  chargement des scripts internes (`scripts/lib/load-app-env.ts`, §13.1) et la ligne `DATABASE_URL`
+  périmée de `.env` (retirée — `.env.local` reste l'unique source pour le développement, §13.1/§13.9).
+  Un `npx prisma migrate status` lancé nu échoue désormais bruyamment (`P1012`) plutôt que de
+  contacter silencieusement l'ancien hôte. La migration a été auditée et pré-validée (§13.3/§13.4)
+  mais **n'a pas été appliquée** : `prisma migrate deploy` reste une action volontaire à exécuter
   soi-même après avoir confirmé l'environnement cible et le mécanisme de sauvegarde (§13.6).
 - **Séparation Production/Development non confirmée programmatiquement** : `DATABASE_URL` est
   marquée "Sensitive" dans l'environnement Vercel Production (valeur jamais révélée, même à
@@ -224,11 +227,12 @@ merge/déploiement production :
 
 ### 13.1 Database connectivity — cause racine du P1001
 
-Deux `DATABASE_URL` différentes coexistent dans ce projet, dans deux fichiers différents :
+Deux `DATABASE_URL` différentes coexistaient dans ce projet, dans deux fichiers différents (état au
+moment du diagnostic — `.env` a depuis été corrigé, voir plus bas) :
 
 | Fichier | Hôte | Nature |
 |---|---|---|
-| `.env` | `db-1614bea1d5.db007.hosteddb.reai.io` | Base de sandbox de développement fournie par **Abacus.AI** (confirmé par `AWS_BUCKET_NAME=abacusai-apps-...` dans ce même fichier) |
+| `.env` (avant correction) | `db-1614bea1d5.db007.hosteddb.reai.io` | Base de sandbox de développement fournie par **Abacus.AI** (confirmé par `AWS_BUCKET_NAME=abacusai-apps-...` dans ce même fichier) |
 | `.env.local` | `db.prisma.io` | **Prisma Postgres**, connexion directe (créé par `# Created by Vercel CLI`, tiré de l'environnement Vercel "development" du projet `allopro-m-ax`) |
 
 Preuves techniques recueillies (host masqué, IP publique non sensible) :
@@ -253,13 +257,45 @@ ce fichier) dès son import, et comme `dotenv` ne réécrit jamais une variable 
 `DATABASE_URL`. C'est pour cela que `npx prisma migrate status` (lancé nu, sans variable
 explicite) retournait P1001 alors que l'application elle-même fonctionne normalement.
 
-**Correctif appliqué** : `scripts/lib/load-app-env.ts` reproduit l'ordre de précédence exact de
-Next.js (`process.env` > `.env.$(NODE_ENV).local` > `.env.local` > `.env.$(NODE_ENV)` > `.env`) et
-**doit être appelé avant tout import de `@prisma/client`** (voir le commentaire en tête de ce
-fichier et son usage dans `scripts/db-connectivity-check.ts`, `scripts/db-preflight.ts`,
-`scripts/account-management-predeploy.ts`, `scripts/db-network-diagnostics.ts`). Aucun fichier
-`.env*` n'a été modifié ni supprimé ; `.env` reste tel quel (il peut encore servir à autre chose,
-et le corriger à l'aveugle sortait du périmètre demandé).
+**Correctif appliqué (application/scripts)** : `scripts/lib/load-app-env.ts` reproduit l'ordre de
+précédence exact de Next.js (`process.env` > `.env.$(NODE_ENV).local` > `.env.local` >
+`.env.$(NODE_ENV)` > `.env`) et **doit être appelé avant tout import de `@prisma/client`** (voir le
+commentaire en tête de ce fichier et son usage dans `scripts/db-connectivity-check.ts`,
+`scripts/db-preflight.ts`, `scripts/account-management-predeploy.ts`,
+`scripts/db-network-diagnostics.ts`).
+
+**Second problème, distinct, découvert ensuite : le CLI Prisma lancé nu.** Le correctif ci-dessus ne
+protège que le code qui appelle `loadAppEnv()`. Un `npx prisma migrate status` tapé directement au
+terminal ne passe par aucun de nos scripts — reproduit et confirmé :
+
+```
+> npx prisma migrate status
+Environment variables loaded from .env
+Datasource "db": PostgreSQL database "1614bea1d5", schema "public" at "db-1614bea1d5.db007.hosteddb.reai.io:5432"
+Error: P1001: Can't reach database server at `db-1614bea1d5.db007.hosteddb.reai.io:5432`
+```
+
+Preuve que ce n'est pas contournable en amont : `grep -o "\.env\.local" node_modules/prisma/build/index.js`
+retourne **zéro occurrence** — le binaire du CLI Prisma ne contient tout simplement aucune référence
+à `.env.local`, ce n'est pas une case à cocher qui aurait été oubliée, c'est une convention propre à
+Next.js que Prisma CLI n'implémente pas. Le CLI charge son propre `.env` via `dotenv.config({path})`
+(confirmé en désassemblant `node_modules/prisma/build/index.js`), et cet appel ne réécrit jamais une
+variable déjà présente dans `process.env` (comportement par défaut de `dotenv`) — vérifié
+empiriquement en forçant `DATABASE_URL` dans l'environnement du process enfant avant de lancer
+`npx prisma migrate status` : le CLI a bien utilisé la valeur forcée (`db.prisma.io`) malgré son
+message `Environment variables loaded from .env`. C'est exactement le mécanisme que
+`scripts/lib/target-env.ts` exploite (§13.10).
+
+**Correctif appliqué (fichier `.env`)** : la ligne `DATABASE_URL=...` a été supprimée de `.env` (et
+uniquement cette ligne — `npm run env:audit` avait d'abord confirmé que `.env` contient 6 autres
+variables absentes de `.env.local` — `NEXTAUTH_SECRET`, `AUTH_SECRET`, `AWS_PROFILE`, `AWS_REGION`,
+`AWS_BUCKET_NAME`, `AWS_FOLDER_PREFIX` — donc supprimer tout le fichier aurait cassé l'auth et le
+stockage S3 ; les corriger à l'aveugle était donc hors de propos, seule `DATABASE_URL` posait
+problème). Conséquence vérifiée : `npx prisma migrate status` lancé nu échoue maintenant
+immédiatement avec `P1012: Environment variable not found: DATABASE_URL` au lieu de contacter
+silencieusement l'ancien hôte — un échec bruyant et sans ambiguïté plutôt qu'une connexion
+silencieuse à la mauvaise base. `.env.local` reste la seule source de `DATABASE_URL` pour le
+développement (application, `next dev`, et tous les scripts `db:*` via `loadAppEnv()`).
 
 ### 13.2 Local vs private network
 
@@ -284,6 +320,9 @@ Résultat obtenu contre `db.prisma.io` (2026-09-26) : tous les checks bloquants 
 `SAFE TO MIGRATE: YES` (1 seule base de développement, 1 utilisateur, 0 professionnel — voir
 `docs/account-management-migration-review.md` pour le détail).
 
+Voir aussi §13.10 pour `npm run db:predeploy` (version généralisée, explicite par environnement) et
+`npm run db:status:dev` / `npm run db:migrate:dev`.
+
 ### 13.4 Staging migration
 
 Aucune base de "staging" distincte n'a été identifiée dans ce projet (un seul environnement Vercel
@@ -294,6 +333,10 @@ recommandé avant toute application réelle, une fois l'environnement cible conf
 `npm run account:predeploy` → confirmation manuelle de sauvegarde (§13.6) → `prisma migrate deploy`
 → tests d'intégration → smoke tests.
 
+`npm run db:predeploy -- --env=staging` (§13.10) refuse systématiquement et explicitement tant
+qu'aucune variable `STAGING_DATABASE_URL` n'est exportée — il n'invente jamais un environnement de
+repli, conformément à la contrainte de ne jamais fabriquer un staging qui n'existe pas.
+
 ### 13.5 Production migration
 
 **Non exécutée.** `prisma migrate deploy` n'a été lancé contre aucune base par ce travail — la
@@ -303,6 +346,12 @@ avec la règle du projet de ne jamais migrer sans confirmation humaine explicite
 technique restante est de lancer `npx prisma migrate deploy` soi-même (voir "Prochaine action"
 en fin de document), après avoir tranché le point ouvert de la section 12 sur la séparation
 Production/Development.
+
+`npm run db:predeploy -- --env=production` (§13.10) n'a **aucun chemin de code** qui appelle
+`migrate deploy`/`migrate reset`/`db push` — pas derrière un flag, pas derrière une variable
+d'environnement. Il exige `PRODUCTION_DATABASE_URL` explicitement exportée (jamais lue
+automatiquement depuis `.env.vercel.production` ou tout autre fichier), n'affiche que les checks en
+lecture seule, et n'affiche jamais de verdict `SAFE TO MIGRATE` pour la production.
 
 ### 13.6 Rollback / recovery
 
@@ -321,7 +370,7 @@ Présence vérifiée par nom de variable uniquement (jamais la valeur) :
 
 | Variable | Présente | Effet si absente |
 |---|---|---|
-| `DATABASE_URL` | `.env` et `.env.local` (deux valeurs différentes, voir §13.1) | Build/démarrage impossible |
+| `DATABASE_URL` | `.env.local` uniquement (retirée de `.env`, voir §13.1) | Build/démarrage impossible |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Non renseignées (placeholders vides dans `.env.example`) | Bouton Google masqué (`isGoogleAuthEnabled()`), aucun échec |
 | `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_FROM_NUMBER` | Non renseignées | `lib/sms.ts` retombe sur le fournisseur `console` (code journalisé serveur, jamais un vrai SMS, jamais un échec silencieux prétendant avoir envoyé) |
 | `CRON_SECRET` | À vérifier en production | `/api/cron/process-deletions` refuse (503) de s'exécuter sans elle |
@@ -344,16 +393,48 @@ antérieures à l'introduction de cette normalisation, ce que `npm run db:prefli
 Error: P1001: Can't reach database server at `db-1614bea1d5.db007.hosteddb.reai.io:5432`
 ```
 
-1. Ce message signifie que le CLI Prisma a résolu `DATABASE_URL` vers l'hôte Abacus.AI (sandbox de
-   développement), pas vers `db.prisma.io`. Lancer `npm run db:check` : s'il affiche
-   `DNS: PRIVATE_IP` puis `TCP: FAIL`, c'est confirmé.
-2. Cause : `.env` contient encore l'ancienne valeur, et un import direct de `@prisma/client` (ou de
-   `lib/prisma.ts`) avant `loadAppEnv()` la fige dans `process.env` avant que `.env.local` ait pu la
-   remplacer (§13.1).
-3. Correctif : utiliser les scripts fournis (`npm run db:check`, `npm run db:preflight`,
-   `npm run account:predeploy`), qui appliquent déjà le bon ordre de chargement — ou, pour une
-   commande Prisma ponctuelle, exporter `DATABASE_URL` explicitement depuis `.env.local` avant de
-   lancer la commande, plutôt que de compter sur le chargement automatique du CLI.
+1. Ce message signifie que le CLI Prisma (ou un script qui importe `@prisma/client` avant
+   `loadAppEnv()`) a résolu `DATABASE_URL` vers l'hôte Abacus.AI (sandbox de développement), pas
+   vers `db.prisma.io`. Lancer `npm run db:check` : s'il affiche `DNS: PRIVATE_IP` puis `TCP: FAIL`,
+   c'est confirmé.
+2. Cause : deux mécanismes distincts peuvent produire ce symptôme (§13.1) — (a) un import direct de
+   `@prisma/client` (ou de `lib/prisma.ts`) avant `loadAppEnv()`, qui fige la valeur dans
+   `process.env` avant que `.env.local` ait pu la remplacer ; (b) le CLI Prisma lancé nu
+   (`npx prisma ...`), qui ne connaît pas `.env.local` du tout — confirmé par l'absence totale de
+   `.env.local` dans le binaire du CLI (`node_modules/prisma/build/index.js`).
+3. Correctif : ne jamais lancer `npx prisma` nu dans ce projet. Utiliser `npm run db:check`,
+   `npm run db:preflight`, `npm run account:predeploy`, `npm run db:status:dev`,
+   `npm run db:predeploy`, ou `npm run db:migrate:dev` (§13.10), qui résolvent `DATABASE_URL`
+   explicitement et l'injectent dans le process enfant plutôt que de compter sur l'auto-chargement
+   du CLI. Depuis la correction de §13.1, `.env` ne contient plus `DATABASE_URL` du tout : un
+   `npx prisma` nu échoue maintenant immédiatement avec `P1012: Environment variable not found`
+   plutôt que de contacter silencieusement l'ancien hôte — un signal explicite que la commande a été
+   lancée sans passer par les scripts fournis.
 4. Ce message n'indique **pas** une base cassée ou une action à corriger côté hébergeur — l'hôte
    Abacus.AI répond simplement à un réseau différent de celui de ce poste, ce qui est son
    fonctionnement prévu.
+
+### 13.10 Commandes explicites par environnement
+
+En complément de `db:check` / `db:preflight` / `account:predeploy` (toujours valables, toujours
+implicitement "development" via `loadAppEnv()`), trois commandes rendent la source de
+`DATABASE_URL` explicite et sans ambiguïté, y compris pour le CLI Prisma lui-même — voir
+`scripts/lib/target-env.ts` pour la résolution par cible et `scripts/lib/predeploy-checks.ts` pour
+les checks partagés :
+
+| Commande | Cible | Comportement |
+|---|---|---|
+| `npm run db:status:dev` | development (fixe) | Affiche `Environment` / `Database host` / `Database name` / `DATABASE_URL source`, puis lance `prisma migrate status` avec cette valeur forcée dans le process enfant. Lecture seule. |
+| `npm run db:predeploy` | development par défaut ; `-- --env=staging`/`--env=production` | Même banner + les checks read-only (connectivité, PostgreSQL, doublons/`phone` vide, migrations en attente). `development`/`staging` : verdict `SAFE TO MIGRATE`. `production` : jamais de verdict, aucun chemin de code ne pouvant appeler `migrate deploy`. |
+| `npm run db:migrate:dev` | development (codé en dur, aucun flag ne peut cibler autre chose) | Relance les mêmes checks ; si `Preflight: FAIL`, refuse et s'arrête. Si `PASS`, lance `prisma migrate dev` en `stdio: inherit` — les invites interactives de Prisma (ex. detection de drift demandant un reset) restent pleinement interactives, rien n'est auto-confirmé. |
+
+`staging`/`production` ne lisent **jamais** un fichier local automatiquement : `staging` exige
+`STAGING_DATABASE_URL` exporté explicitement (refuse proprement sinon, n'invente rien) ;
+`production` exige `PRODUCTION_DATABASE_URL` exporté explicitement (jamais lu depuis
+`.env.vercel.production`, qui reste un fichier de référence humaine, pas une source automatique).
+
+`npm run env:audit` (`scripts/env-audit.ts`) — lecture seule, n'affiche jamais de valeur de secret :
+pour chaque fichier `.env`/`.env.local`/`.env.vercel.production`, présence de `DATABASE_URL`, hôte
+masqué, nom de base, et l'ensemble des **noms** de variables présentes uniquement dans l'un des deux
+fichiers (jamais les valeurs) — utile avant de décider si un fichier `.env*` peut être corrigé,
+remplacé, ou supprimé sans casser une variable qui n'existe que là.

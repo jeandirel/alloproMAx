@@ -25,12 +25,15 @@ export function parseDatabaseUrl(raw: string): ParsedDbUrl | null {
   }
 }
 
-// Masks credentials for safe logging: postgresql://USER:********@HOST:PORT/DATABASE
+// Masks credentials for safe logging: postgresql://********:********@HOST:PORT/DATABASE
+// Neither field is ever shown in full — on this project the "user" segment of a Prisma Postgres
+// connection string is itself a long, secret, API-key-equivalent credential, not a human-readable
+// username, so it gets the same full masking as the password.
 export function maskDatabaseUrl(raw: string): string {
   try {
     const url = new URL(raw)
-    const user = url.username ? decodeURIComponent(url.username) : ''
-    return `${url.protocol}//${user}:********@${url.host}${url.pathname}`
+    const userMask = url.username ? '********' : ''
+    return `${url.protocol}//${userMask}:********@${url.host}${url.pathname}`
   } catch {
     return '(unparseable connection string — not shown)'
   }
