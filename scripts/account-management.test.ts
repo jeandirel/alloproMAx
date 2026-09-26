@@ -88,31 +88,23 @@ assert.ok(!ADMIN_ROLES.includes(''))
 console.log('Admin role allowlist : PASS')
 
 // ---------------------------------------------------------------------------
-// Explicitly SKIPPED — require a live database connection (the hosted
-// Postgres is confirmed unreachable this session):
-// - auth.ts jwt/session callbacks: fresh sign-in creates a Session row,
-//   token.sessionId round-trips through session.sessionId, a revoked/expired
-//   Session row strips token.id/sessionId so `session.user` becomes
-//   undefined (app/(app)/layout.tsx's existing redirect then applies with no
-//   further changes).
-// - auth.ts signIn callback denying suspended/deleted accounts for every
-//   provider (credentials, phone, demo-otp, demo-admin, google).
-// - lib/account-lifecycle.ts: pauseAccount/reactivateAccount/
-//   requestAccountDeletion/cancelAccountDeletion/anonymizeUser/
-//   processScheduledDeletions (30-day grace period math against a real
-//   deletionScheduledAt), pause/reactivate/deleteProfessionalProfile
-//   (profile-only deletion leaving the User row and its booking/review
-//   history untouched), adminSuspend/UnsuspendUser/Professional (including
-//   revokeAllSessions side effect and the AuditLog row it writes).
-// - app/api/account/**, app/api/sessions/**, app/api/professional/**,
-//   app/api/admin/{users,professionals}/**, app/api/cron/process-deletions
-//   end-to-end (real 401/403 for missing/non-admin sessions, real mutations,
-//   the CRON_SECRET bearer check).
-// - app/login/actions.ts requestPhoneOtp: rate-limit + 30s resend cookie
-//   throttle + PhoneOtp row creation against a real DB.
-// These require integration testing against a live Postgres instance and
-// cannot be exercised as pure/deterministic unit tests. See the
-// "Deferred DB outage" note in docs/account-management.md.
+// Everything below requires a live database connection, so it lives in
+// scripts/account-management-integration.test.ts instead of here (run
+// separately — it writes real rows, under a clearly-marked, self-cleaning
+// test identity — see that file's header). Covered there: User/Professional
+// creation, Credentials login DB checks (bcrypt + suspended/deleted gate),
+// Session creation/revocation, logout (Session row survival), account- and
+// professional-level pause/reactivate, the 30-day deletion grace period
+// (request/cancel + the processScheduledDeletions sweep), anonymizeUser,
+// admin suspend/unsuspend (user + professional, including revokeAllSessions
+// and the AuditLog rows written), DB-authoritative RBAC, PhoneOtp
+// find-or-create (single-use, replay-proof), preferences/consents, and the
+// AuditLog trail. Not covered even there (needs a real Next.js request
+// context / AsyncLocalStorage, not just a live DB): auth.ts's jwt/session
+// callbacks and requireApiUser/requireAdminApi wiring at the HTTP layer, and
+// app/login/actions.ts's rate-limit/cookie-throttle logic around
+// requestPhoneOtp — these would need to run against a live server, not a
+// bare script.
 // ---------------------------------------------------------------------------
 
 console.log('GESTION DE COMPTE : PASS — sélection du fournisseur SMS, rôle de signup, allowlist admin.')
