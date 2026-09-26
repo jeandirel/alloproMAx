@@ -639,9 +639,41 @@ L'intégration a été installée après acceptation des conditions (§14.6). D�
   `npx tsc --noEmit` PASS (0 erreur), `npx eslint .` PASS (0 erreur, 42 warnings préexistants,
   inchangés), `npm test` PASS (5 suites), `npm run build` PASS (exit 0).
 
-**Reste à faire** : suite de tests d'intégration Account Management (§8) contre Neon Development
-avec de vraies écritures (création, login, sessions, pause/réactivation, suppression/anonymisation,
-modération admin, RBAC, PhoneOtp, préférences/consentements, AuditLog) — en cours.
+### 14.10 Tests d'intégration Account Management contre Neon Development — PASS
+
+`scripts/account-management-integration.test.ts` (nouveau) exécute, avec de vraies écritures contre
+Neon Development, les 12 volets du §8 : création User/Professional, logique de connexion Credentials
+(bcrypt + blocage suspendu/supprimé), création/révocation de Session, déconnexion (la ligne Session
+survit — comportement attendu, `auth.ts` ne définit pas `events.signOut`), pause/réactivation compte
+ET profil professionnel, période de rétractation de 30 jours (demande/annulation + le balayage
+`processScheduledDeletions`), anonymisation (directe et via le balayage planifié), modération admin
+(suspension/levée compte et professionnel, y compris la révocation de sessions et les lignes
+AuditLog), RBAC DB-authoritative, PhoneOtp (find-or-create, usage unique, résistant au rejeu),
+préférences/consentements, et la traçabilité AuditLog complète.
+
+`auth.ts` et `lib/account-guard.ts` reposent sur le contexte de requête Next.js (`auth()`/`headers()`,
+AsyncLocalStorage) et ne sont donc pas invocables depuis un script autonome — ce test appelle
+directement la logique DB importable (`lib/account-lifecycle.ts`, `lib/sms.ts`) et rejoue fidèlement,
+contre une vraie base, les quelques vérifications liées à la requête (authorize Credentials/téléphone,
+la porte suspendu/supprimé de `signIn`/`getCurrentUser`) plutôt que de les deviner.
+
+Isolation : toutes les lignes créées portent un marqueur explicite (domaine e-mail
+`@integration-test.allopro.invalid`, préfixe téléphone `it-phone-`), sont suivies par id et supprimées
+dans un bloc `finally` — y compris les lignes AuditLog dont le `targetId` pointe vers un Professional
+(non couvertes par la cascade FK de User). Un balayage en début d'exécution nettoie tout résidu d'une
+exécution précédente interrompue. Deux exécutions consécutives confirment l'idempotence (0 résidu
+avant/après, vérifié par requête directe).
+
+Résultat : **12/12 sections PASS**, aucune donnée réelle touchée (2 `User` migrés depuis l'ancienne
+base restent inchangés), 0 résidu de test après exécution.
+
+Quality gates re-vérifiées une dernière fois après ce script : `prisma generate` PASS, `npx tsc
+--noEmit` PASS (0 erreur), `npx eslint .` PASS (0 erreur, 42 warnings préexistants, inchangés), `npm
+test` PASS (5 suites, logique pure uniquement — l'intégration ci-dessus reste volontairement séparée
+de `npm test` pour ne jamais dépendre d'une base vivante ni risquer d'écrire dedans à chaque run), `npm
+run build` PASS. `npm run db:status:dev` reconfirme 0 migration en attente.
+
+**DEV READY WITH NEON : YES.**
 
 ## 15. Plan de bascule Production — Neon (préparé, non exécuté)
 
