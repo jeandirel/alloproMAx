@@ -600,12 +600,48 @@ source/cible identiques pour toutes les tables non vides (`User=1`, `DemoWorkspa
 source row count. ». Prêt à être rejoué tel quel contre la vraie Neon Development dès que la base
 existe — seule variable à fournir alors : `TARGET_DATABASE_URL` (la `DIRECT_URL` Neon Development).
 
-### 14.9 Suite (bloquée sur §14.6)
+### 14.9 Résultat — Neon Development opérationnelle
 
-Une fois l'intégration installée : appliquer l'historique de migrations réparé (§13.11) sur Neon
-Development via `prisma migrate deploy`, vérifier connectivité/schéma/0 migration en attente,
-rejouer `migrate-data-to-neon.ts --dry-run` puis `--execute` contre la vraie base, puis dérouler la
-suite de tests d'intégration Account Management (§8) contre Neon Development.
+L'intégration a été installée après acceptation des conditions (§14.6). Détails d'exécution :
+
+- **Conflit de connexion** : `vercel integration add neon ...` a d'abord échoué
+  (`This project already has an existing environment variable with name DATABASE_URL`) — la
+  variable `DATABASE_URL` de l'environnement Vercel Development appartenait encore à l'ancienne
+  intégration `prisma-postgres-green-harbor`. Résolu par `vercel env rm DATABASE_URL development`
+  (Development uniquement — Preview/Production utilisent des noms préfixés distincts,
+  `Allopromax_*`, jamais touchés), puis `vercel integration resource connect allopro-neon
+  allopro-m-ax -e development -y` pour connecter la ressource déjà provisionnée sans en recréer une
+  seconde.
+- **Variables réelles créées** (noms uniquement) : `DATABASE_URL`, `DATABASE_URL_UNPOOLED`,
+  `PGHOST`/`PGHOST_UNPOOLED`/`PGUSER`/`PGPASSWORD`/`PGDATABASE`, `POSTGRES_*` (alias), et
+  `NEON_PROJECT_ID` — conforme au contrat attendu (§14.3). `DATABASE_URL_UNPOOLED` mappée vers
+  `DIRECT_URL` dans `.env.local` (jamais committé). L'ancienne valeur `db.prisma.io` a été
+  conservée sous `OLD_DEV_DATABASE_URL` dans ce même fichier local, uniquement comme source pour la
+  migration de données ci-dessous.
+- **Connectivité** : `npm run db:status:dev` → hôte
+  `ep-orange-dawn-b812gxz6-pooler.c-14.us-east-1.aws.neon.tech`, base `neondb`. PASS.
+- **Réplication du schéma** : `prisma migrate deploy` sur la base Neon Development, alors vide, a
+  appliqué les 3 migrations réparées (§13.11) sans erreur. `prisma migrate dev --skip-generate`
+  rejoué ensuite confirme `Already in sync, no schema change or pending migration was found` — 0
+  P3006, 0 migration en attente. `prisma migrate diff --from-url <Neon> --to-schema-datasource
+  schema.prisma` → `-- This is an empty migration.` (0 drift).
+- **Connexion poolée (PgBouncer-style)** : testée avec des requêtes Prisma concurrentes et répétées
+  contre l'URL poolée (`DATABASE_URL`) — aucune erreur de prepared statement observée ; pas
+  d'ajout de `pgbouncer=true` nécessaire pour l'instant (à revisiter seulement si une vraie erreur
+  apparaît, conformément à la boucle RUN → FAIL → DIAGNOSE → FIX).
+- **Migration des données** (§14.7/14.8) : `migrate-data-to-neon.ts --dry-run` puis `--execute`
+  rejoués pour de vrai (`SOURCE_DATABASE_URL=OLD_DEV_DATABASE_URL`, `TARGET_DATABASE_URL=DIRECT_URL`
+  Neon). Résultat : toutes les tables non vides transférées et validées à l'identique (`User=2`,
+  `DemoWorkspace=2`, `UploadedAsset=3`, `DemoOtp=1`, `Province=9`, `City=52`, `Neighborhood=820`,
+  `Category=13`, `ServiceSubcategory=50`, `CatalogService=588`) — verdict final « All tables reached
+  at least the source row count. ». Base source jamais modifiée (lecture seule).
+- **Quality gates** re-vérifiées contre l'environnement Neon-backed : `prisma generate` PASS,
+  `npx tsc --noEmit` PASS (0 erreur), `npx eslint .` PASS (0 erreur, 42 warnings préexistants,
+  inchangés), `npm test` PASS (5 suites), `npm run build` PASS (exit 0).
+
+**Reste à faire** : suite de tests d'intégration Account Management (§8) contre Neon Development
+avec de vraies écritures (création, login, sessions, pause/réactivation, suppression/anonymisation,
+modération admin, RBAC, PhoneOtp, préférences/consentements, AuditLog) — en cours.
 
 ## 15. Plan de bascule Production — Neon (préparé, non exécuté)
 
