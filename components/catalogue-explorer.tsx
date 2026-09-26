@@ -463,7 +463,7 @@ export function CatalogueExplorer({ value, onChange, placeholder = 'Choisir un s
       if (!res.ok) { toast.error(data.error || 'Suggestion impossible.'); return }
 
       if (data.status === 'created') {
-        toast.success('Merci ! Votre proposition a été envoyée à notre équipe. Elle apparaîtra sur AlloPro après validation.')
+        toast.success('Merci ! Votre proposition a été envoyée à notre équipe. Elle apparaîtra sur Allo Pro après validation.')
         setShowSuggestForm(false)
         setSuggestName('')
         setSuggestDescription('')

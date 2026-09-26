@@ -30,9 +30,16 @@ export interface LocationPickerProps {
   onChange: (next: LocationPickerValue | null) => void
   /** Fallback label shown on the trigger when no location is selected. */
   placeholder?: string
-  /** Controls the trigger's visual style only — content/behavior is identical. */
-  variant?: 'popover' | 'inline'
+  /**
+   * Controls the trigger's visual style — content/behavior is identical.
+   * `panel` renders the cascading form directly (no popover/drawer chrome),
+   * for a standalone homepage section (e.g. "Où avez-vous besoin d'un
+   * professionnel ?").
+   */
+  variant?: 'popover' | 'inline' | 'panel'
   className?: string
+  /** Label of the commit button — only used by the `panel` variant. */
+  submitLabel?: string
 }
 
 interface ProvinceOption { id: string; name: string; slug: string }
@@ -116,10 +123,10 @@ async function fetchNeighborhoods(cityId: string): Promise<NeighborhoodOption[]>
   return promise
 }
 
-export function LocationPicker({ value, onChange, placeholder = 'Votre localisation', variant = 'popover', className }: LocationPickerProps) {
+export function LocationPicker({ value, onChange, placeholder = 'Votre localisation', variant = 'popover', className, submitLabel = 'Utiliser cette localisation' }: LocationPickerProps) {
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const open = popoverOpen || drawerOpen
+  const open = popoverOpen || drawerOpen || variant === 'panel'
 
   const [provinces, setProvinces] = useState<ProvinceOption[]>(() => provincesCache ?? [])
   const [cities, setCities] = useState<CityOption[]>([])
@@ -320,7 +327,7 @@ export function LocationPicker({ value, onChange, placeholder = 'Votre localisat
       if (!res.ok) { toast.error(data.error || 'Suggestion impossible.'); return }
 
       if (data.status === 'created') {
-        toast.success('Merci ! Votre proposition a été envoyée à notre équipe. Elle apparaîtra sur AlloPro après validation.')
+        toast.success('Merci ! Votre proposition a été envoyée à notre équipe. Elle apparaîtra sur Allo Pro après validation.')
         setShowSuggestForm(false)
         setSuggestName('')
         setSuggestExtra('')
@@ -415,21 +422,21 @@ export function LocationPicker({ value, onChange, placeholder = 'Votre localisat
 
         <div className="grid gap-4">
           <label className="ap-label">
-            Province
-            <select className="ap-input mt-1.5" value={pendingProvinceId} onChange={(e) => handleProvinceChange(e.target.value)}>
+            Province *
+            <select className="ap-input mt-1.5" required value={pendingProvinceId} onChange={(e) => handleProvinceChange(e.target.value)}>
               <option value="">Sélectionner une province</option>
               {provinces.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           </label>
           <label className="ap-label">
-            Ville
-            <select className="ap-input mt-1.5" value={pendingCityId} onChange={(e) => handleCityChange(e.target.value)} disabled={!pendingProvinceId || citiesLoading}>
+            Ville *
+            <select className="ap-input mt-1.5" required value={pendingCityId} onChange={(e) => handleCityChange(e.target.value)} disabled={!pendingProvinceId || citiesLoading}>
               <option value="">{citiesLoading ? 'Chargement…' : 'Sélectionner une ville'}</option>
               {cities.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </label>
           <label className="ap-label">
-            Quartier <span className="font-normal text-muted-foreground">(facultatif)</span>
+            Quartier <span className="font-normal text-muted-foreground">(Facultatif)</span>
             <select className="ap-input mt-1.5" value={pendingNeighborhoodId} onChange={(e) => setPendingNeighborhoodId(e.target.value)} disabled={!pendingCityId || neighborhoodsLoading}>
               <option value="">{neighborhoodsLoading ? 'Chargement…' : 'Sélectionner un quartier'}</option>
               {neighborhoods.map((n) => <option key={n.id} value={n.id}>{n.name}</option>)}
@@ -439,7 +446,7 @@ export function LocationPicker({ value, onChange, placeholder = 'Votre localisat
 
         {!inDrawer && (
           <button type="button" className="ap-button w-full" disabled={!pendingProvinceId} onClick={commitPending}>
-            Utiliser cette localisation
+            {submitLabel}
           </button>
         )}
       </>
@@ -450,9 +457,8 @@ export function LocationPicker({ value, onChange, placeholder = 'Votre localisat
     if (!showSuggestForm) {
       return (
         <div className="border-t border-border/60 pt-4 text-sm">
-          <p className="text-muted-foreground">Vous ne trouvez pas votre localisation ?</p>
-          <button type="button" className="mt-1 font-semibold text-emerald-dark hover:underline" onClick={openSuggestForm}>
-            + Ajouter une ville ou un quartier
+          <button type="button" className="font-semibold text-emerald-dark hover:underline" onClick={openSuggestForm}>
+            Je ne trouve pas ma ville ou mon quartier
           </button>
         </div>
       )
@@ -521,6 +527,15 @@ export function LocationPicker({ value, onChange, placeholder = 'Votre localisat
           {suggestSubmitting ? 'Envoi…' : 'Envoyer la proposition'}
         </button>
       </form>
+    )
+  }
+
+  if (variant === 'panel') {
+    return (
+      <div className={cn('flex flex-col gap-4', className)}>
+        {renderSearchAndCascade(false)}
+        {renderNotFoundSection()}
+      </div>
     )
   }
 

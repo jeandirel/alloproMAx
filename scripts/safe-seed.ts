@@ -1,6 +1,15 @@
 import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
+import { loadAppEnv } from "./lib/load-app-env";
+
+// Resolve DATABASE_URL the same way the rest of the app does (.env.local over .env) before
+// spawning the child seed process below. `.env` no longer carries DATABASE_URL at all (see
+// docs/account-management.md §13.1) so a bare `--require dotenv/config` child (which only loads
+// ".env") would otherwise start with no DATABASE_URL. Resolving it here and letting execSync
+// inherit process.env means the child's own dotenv/config call becomes a no-op for this key
+// (dotenv never overrides an already-set variable), same mechanism as scripts/lib/load-app-env.ts.
+loadAppEnv();
 
 try {
   const seedFile = path.resolve(process.cwd(), "scripts/seed.ts");

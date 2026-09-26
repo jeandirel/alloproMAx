@@ -2,12 +2,13 @@
 
 import { useState } from 'react'
 import { OtpLogin } from '@/components/otp-login'
+import { PhoneLogin } from '@/components/phone-login'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
 
-export function LoginClient({ allowDemoAuth }: { allowDemoAuth: boolean }) {
+export function LoginClient({ allowDemoAuth, googleAuthEnabled }: { allowDemoAuth: boolean; googleAuthEnabled: boolean }) {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -36,7 +37,7 @@ export function LoginClient({ allowDemoAuth }: { allowDemoAuth: boolean }) {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
-        <Link href="/" className="text-2xl font-bold text-emerald-dark font-display mb-1">Allo-Pro</Link>
+        <Link href="/" className="text-2xl font-bold text-emerald-dark font-display mb-1">Allo Pro</Link>
         <p className="text-xs text-muted-foreground mb-8">Le bon professionnel, au bon moment.</p>
 
         <div className="w-full max-w-sm">
@@ -46,6 +47,27 @@ export function LoginClient({ allowDemoAuth }: { allowDemoAuth: boolean }) {
             <div className="bg-destructive/10 text-destructive text-xs p-3 rounded-lg mb-4 text-center">{error}</div>
           )}
 
+          <PhoneLogin />
+          {googleAuthEnabled && (
+            <button
+              type="button"
+              className="ap-secondary w-full mb-6 flex items-center justify-center gap-2"
+              disabled={loading}
+              onClick={async () => {
+                setLoading(true)
+                try {
+                  // Redirection complète vers Google (requis pour OAuth) : pas de redirect:false ici.
+                  await signIn('google', { callbackUrl: '/accueil' })
+                } catch (e) {
+                  console.error(e)
+                  setError('Connexion Google indisponible.')
+                  setLoading(false)
+                }
+              }}
+            >
+              Continuer avec Google
+            </button>
+          )}
           {allowDemoAuth && <OtpLogin />}
           {allowDemoAuth && <button className="ap-secondary w-full mb-6" disabled={loading} onClick={async()=>{setLoading(true);try{const result=await signIn('demo-admin',{redirect:false});if(result?.error)setError('Impossible d’ouvrir la démonstration administrateur.');else router.replace('/administration')}catch(e){console.error(e);setError('Connexion indisponible.')}finally{setLoading(false)}}}>Explorer l’administration (nouvelle démo privée)</button>}
           <h2 className="text-sm font-semibold mb-3">Ou retrouver votre compte par e-mail</h2>

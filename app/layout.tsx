@@ -19,15 +19,15 @@ export const viewport = { width: 'device-width', initialScale: 1, viewportFit: '
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000'),
-  title: 'Allo-Pro — Le bon professionnel, au bon moment',
-  description: 'Trouvez des professionnels vérifiés pour vos services à domicile à Libreville, Gabon. Plomberie, électricité, ménage et plus.',
+  title: 'Allo Pro — Trouvez un professionnel près de chez vous au Gabon',
+  description: 'Plomberie, électricité, ménage, coiffure, mécanique, informatique et bien plus. Trouvez un professionnel près de chez vous, partout au Gabon.',
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
   },
   openGraph: {
-    title: 'Allo-Pro — Le bon professionnel, au bon moment',
-    description: 'Marketplace de services à domicile au Gabon',
+    title: 'Allo Pro — Trouvez un professionnel près de chez vous au Gabon',
+    description: 'Plateforme de mise en relation avec des professionnels locaux au Gabon.',
     images: ['/og-image.png'],
   },
 }

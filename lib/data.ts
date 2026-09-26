@@ -5,19 +5,29 @@ export interface Professional {
   categorie: string
   zone: string
   note: number
+  /** Nombre d'avis réels derrière `note`. 0 = pas encore d'avis (à ne pas afficher comme une note). */
+  ratingCount?: number
   missions: number
   tarifMin: number
   verifie: boolean
   enLigne: boolean
   photo: string
   bio: string
-  tauxReponse: number
-  delaiMoyen: string
+  tauxReponse: number | null
+  delaiMoyen: string | null
   disponibilite: string
   zones: string[]
   services: { nom: string; tarif: number }[]
   galerie: string[]
   avis: { nom: string; photo: string; note: number; date: string; commentaire: string; quartier: string }[]
+  /** Numéro de contact réel, si renseigné par le professionnel. Absent = pas de bouton d'appel. */
+  phone?: string | null
+  // Champs additionnels utilisés uniquement par les fiches réelles (issues de
+  // la base de données) pour les filtres par identifiant dans /recherche.
+  cityId?: string | null
+  neighborhoodId?: string | null
+  neighborhoodIds?: string[]
+  serviceIds?: string[]
 }
 
 const professionalData: Professional[] = [

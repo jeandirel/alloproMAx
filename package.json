@@ -6,8 +6,15 @@
     "build": "prisma generate && next build --webpack",
     "start": "next start",
     "lint": "eslint .",
-    "test": "tsx scripts/marketplace-rules.test.ts && tsx scripts/payment-rules.test.ts && tsx scripts/location-rules.test.ts && tsx scripts/service-rules.test.ts",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "test": "tsx scripts/marketplace-rules.test.ts && tsx scripts/payment-rules.test.ts && tsx scripts/location-rules.test.ts && tsx scripts/service-rules.test.ts && tsx scripts/account-management.test.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "db:check": "tsx scripts/db-connectivity-check.ts",
+    "db:preflight": "tsx scripts/db-preflight.ts",
+    "account:predeploy": "tsx scripts/account-management-predeploy.ts",
+    "env:audit": "tsx scripts/env-audit.ts",
+    "db:status:dev": "tsx scripts/db-status.ts --env=development",
+    "db:predeploy": "tsx scripts/db-predeploy.ts",
+    "db:migrate:dev": "tsx scripts/db-migrate-dev.ts"
   },
   "prisma": {
     "seed": "tsx --require dotenv/config scripts/safe-seed.ts"
