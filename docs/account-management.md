@@ -89,8 +89,10 @@ recherche/modération, et deux `FOREIGN KEY` (`suspendedById`) en `ON DELETE SET
 SAFE/CHECK_REQUIRED/RISKY : `docs/account-management-migration-review.md`.
 
 **État** : connectivité rétablie (§13.1) ; `npm run db:preflight` exécuté avec succès contre la base
-de développement (`db.prisma.io`) — 0 doublon et 0 chaîne vide sur `User.phone`, migration non
-encore appliquée sur cette base. Voir §13.3 pour la procédure avant `prisma migrate deploy`.
+de développement (`db.prisma.io`) — 0 doublon et 0 chaîne vide sur `User.phone`. L'historique des
+migrations 1 et 2 (dont dépend celle-ci pour un replay complet) a depuis été réparé et vérifié de
+bout en bout sur une base vide jetable (§13.11) ; l'application réelle sur `db.prisma.io` reste
+bloquée sur une seule étape (réconciliation de `_prisma_migrations`, §13.11.5).
 
 ## 5. Endpoints ajoutés
 
@@ -438,3 +440,202 @@ pour chaque fichier `.env`/`.env.local`/`.env.vercel.production`, présence de `
 masqué, nom de base, et l'ensemble des **noms** de variables présentes uniquement dans l'un des deux
 fichiers (jamais les valeurs) — utile avant de décider si un fichier `.env*` peut être corrigé,
 remplacé, ou supprimé sans casser une variable qui n'existe que là.
+
+### 13.11 Historique de migration réparé — root cause P3006/P1014 sur `Address`
+
+**Symptôme** : `npm run db:migrate:dev` échouait avec `P3006` sur
+`20260924202220_add_gabon_locations`, lui-même causé par `P1014: The underlying table for model
+Address does not exist` pendant le replay sur la shadow database de Prisma.
+
+**Root cause** (confirmée par lecture de `prisma/schema.prisma`, de tous les `migration.sql`, de
+l'historique Git — `git log -S'CREATE TABLE "Address"' --all` ne retourne **aucun** commit — et
+d'une inspection en lecture seule de `db.prisma.io` via `scripts/db-inspect-address.ts` /
+`scripts/db-dump-ddl.ts`) : au commit `5fa446f`, ~29 modèles Prisma (dont `Address`, `Category`,
+`Professional`, `Service`) ont été ajoutés à `schema.prisma` **en même temps que** la création du
+dossier `prisma/migrations/`, mais seuls 8 de ces modèles ont reçu un vrai `CREATE TABLE` dans les
+migrations écrites à ce moment-là — les ~20 autres n'apparaissent que via des `ALTER
+TABLE`/`FOREIGN KEY`, qui supposent silencieusement leur préexistence. La base de développement les
+possède réellement (confirmé par `to_regclass`), preuve d'un `prisma db push` historique jamais
+capturé sous forme de migration, avant que le dossier `migrations/` n'existe. Ce n'est donc **pas**
+une migration supprimée (CASE C exclue par la recherche Git ci-dessus) mais un **drift historique
+non tracé** (CASE B).
+
+**Réparation appliquée** (pattern officiel Prisma "baseline an existing database", documenté par
+`prisma migrate resolve --help`) :
+1. `scripts/db-generate-baseline.ts` génère, via
+   `prisma migrate diff --from-empty --to-schema-datasource prisma/schema.prisma --script` contre
+   la vraie base (introspection en lecture seule, `DATABASE_URL` jamais passée en argument CLI —
+   uniquement via l'environnement du process enfant), le SQL exact nécessaire pour construire les
+   38 tables actuellement réelles à partir de rien.
+2. `prisma/migrations/20260924202220_add_gabon_locations/migration.sql` — remplacée par ce script
+   complet (38 `CREATE TABLE`, tous les index, toutes les `FOREIGN KEY`).
+3. `prisma/migrations/20260924205721_add_services_catalogue/migration.sql` — réduite à un no-op
+   (`SELECT 1;`), ses effets étant désormais entièrement absorbés par la baseline ci-dessus. Le
+   dossier est conservé (pas supprimé) pour préserver l'ordre/l'horodatage historique.
+4. `prisma/migrations/20260926120000_add_account_lifecycle/migration.sql` — **non modifiée** (ne
+   référence pas `Address`, s'applique proprement une fois `Professional` créée par la baseline).
+
+**Vérification de bout en bout — sur base jetable, jamais sur `db.prisma.io`** : un conteneur
+Postgres local temporaire (`docker run --rm postgres:16-alpine`, détruit immédiatement après, aucune
+donnée réelle) a servi à rejouer l'historique complet :
+```
+npx prisma migrate deploy   →  3 migrations appliquées, 0 erreur (empty DB → schéma final)
+npx prisma migrate diff --from-url <shadow> --to-schema-datasource prisma/schema.prisma --script
+                             →  "-- This is an empty migration." (aucun drift)
+```
+Ceci confirme que l'historique réparé est **auto-suffisant et fidèle à `schema.prisma`** : rejouer
+depuis une base vide reproduit exactement le schéma attendu, sans dépendre d'un état préexistant.
+
+**13.11.5 — Ce qui reste bloqué** : les deux fichiers réécrits ci-dessus étaient déjà marqués
+`APPLIED` dans `_prisma_migrations` sur la vraie base `db.prisma.io` (leur SQL y a déjà été exécuté
+historiquement, via le `db push` non tracé). Les rejouer pour de vrai échouerait
+(`relation already exists`) — la voie correcte est `prisma migrate resolve --applied <name>`, qui
+ne fait que recalculer le checksum stocké sans exécuter de SQL (mécanisme documenté officiellement
+pour "reconcile hotfixes done manually on databases with your migration history", exactement ce cas
+— `scripts/db-migrate-resolve.ts`). Cette action a été refusée par le classificateur de permissions
+de l'environnement d'exécution (catégorie "Modify Shared Resources" — écriture, même minime, sur la
+table de bookkeeping d'une base distante). Elle nécessite une confirmation humaine explicite avant
+de pouvoir être rejouée ; jusque-là, `prisma migrate deploy`/`dev` réel sur `db.prisma.io` (donc
+l'application de `20260926120000_add_account_lifecycle`) reste en attente.
+
+## 14. Migration vers Neon Postgres (intégration Vercel) — plan et état
+
+### 14.1 Pourquoi
+
+`db.prisma.io` (Prisma Postgres, intégration `prisma-postgres-green-harbor`) reste un environnement
+de développement à usage limité (pas de branching, historique déjà réparé une fois — §13.11). Décision :
+bascule complète et définitive vers **Neon Postgres**, intégré nativement à Vercel, avec trois bases
+isolées (Development / Preview / Production) au lieu d'une seule base partagée. Contraintes strictes,
+valables pour toute la durée de cette bascule : ne jamais toucher la Production existante, ne jamais
+supprimer une base existante, ne jamais pousser/merger, ne perdre aucune donnée.
+
+### 14.2 Architecture cible
+
+| Environnement Vercel | Base Neon | Partage de données |
+|---|---|---|
+| Development (local, `.env.local`) | Neon **Development** | Isolée — jamais de données Production |
+| Preview (déploiements de PR) | Neon **Preview**, idéalement une branche Neon par déploiement | Isolée de Production |
+| Production | Neon **Production** | Inchangée jusqu'à un cutover explicite et validé — voir §15 |
+
+### 14.3 Contrat de variables d'environnement
+
+L'intégration Vercel/Neon crée, par environnement Vercel : `DATABASE_URL` (poolée, compatible
+Vercel Functions), `DATABASE_URL_UNPOOLED` (connexion directe), `PGHOST`/`PGUSER`/`PGDATABASE`/
+`PGPASSWORD`, et optionnellement des variables Neon Auth (désactivées ici via `-m auth=false` :
+NextAuth est déjà en place, §9). Mapping requis pour Prisma (schema.prisma exige déjà les deux,
+voir `datasource db` §14.4) :
+
+- `DATABASE_URL` (Prisma) ← `DATABASE_URL` (Neon, poolée) — utilisée par l'app en runtime.
+- `DIRECT_URL` (Prisma) ← `DATABASE_URL_UNPOOLED` (Neon, directe) — utilisée uniquement par le CLI
+  Prisma (`migrate dev/deploy/diff`, `validate`) ; jamais lue par `prisma generate` ni par le moteur
+  de requête en runtime (confirmé empiriquement).
+
+Ce mapping n'est **jamais** deviné : à chaque environnement Vercel réellement connecté, les noms
+effectifs sont vérifiés via `vercel env ls <environment>` avant toute copie de valeur.
+
+### 14.4 `schema.prisma`
+
+```prisma
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+```
+
+`directUrl` est désormais déclarée. Elle ne casse pas `prisma generate` (fonctionne sans
+`DIRECT_URL` défini) mais est requise par les commandes du moteur de migration
+(`validate`/`migrate status/dev/deploy/diff`) — cohérent avec le fait que ces dernières passent déjà
+toutes par les wrappers `scripts/db-*.ts` (§13.10), qui chargent `.env.local` via `loadAppEnv()`.
+
+### 14.5 Aucun changement de code requis dans les wrappers existants
+
+Vérification explicite (grep + lecture) : `scripts/lib/target-env.ts`, `scripts/db-status.ts`,
+`scripts/db-predeploy.ts`, `scripts/db-migrate-dev.ts` et `scripts/lib/predeploy-checks.ts` ne
+contiennent **aucune** référence en dur à `db.prisma.io`/`hosteddb.reai.io` — `resolveTargetEnv('development')`
+résout déjà `DATABASE_URL`/`DIRECT_URL` uniquement depuis ce que `.env.local` contient, quel que soit
+l'hébergeur réel. Conséquence directe : `npm run db:status:dev` / `db:preflight` / `db:migrate:dev`
+cibleront Neon Development **automatiquement et sans aucune modification de code**, dès que
+`.env.local` contient les vraies valeurs Neon (§14.3). Seule exception volontaire :
+`scripts/db-count-old-dev.ts`, dont le rôle est justement de continuer à pointer sur l'ancienne base
+tant que la migration de données (§14.7) n'est pas confirmée terminée.
+
+### 14.6 État de l'installation
+
+Bloqué à l'étape d'installation de l'intégration marketplace Neon elle-même : Vercel exige une
+première acceptation humaine des conditions Neon dans un navigateur
+(`vercel integration add neon ...` renvoie `status: action_required,
+reason: integration_terms_acceptance_required`) — limitation produit/CLI réelle et attendue pour
+toute première installation d'une intégration marketplace, non contournable en mode
+non-interactif. Commande de relance, à rejouer telle quelle une fois les conditions acceptées :
+
+```
+vercel --non-interactive integration add neon --plan free_v3 -m auth=false -m region=iad1 --no-env-pull -n allopro-neon
+```
+
+### 14.7 Recensement des données de l'ancienne base Development (lecture seule)
+
+`scripts/db-count-old-dev.ts` (comptages uniquement, aucun contenu de ligne affiché) : la base
+`db.prisma.io` actuelle contient très peu de données réelles — 1 `User`, 0 `Professional`, 0
+`Address`/`Session`/`AuditLog` — l'essentiel du volume est du référentiel (`Province`, `City`,
+`Neighborhood`, `Category`, `ServiceSubcategory`, `CatalogService`) et quelques lignes de démo
+(`DemoWorkspace`, `UploadedAsset`, `DemoOtp`).
+
+### 14.8 Script de transfert `scripts/migrate-data-to-neon.ts`
+
+Ordre des tables dérivé automatiquement du DMMF Prisma (parents avant enfants, par relation FK
+scalaire) — jamais d'ordre codé en dur. Ne journalise jamais de contenu de ligne ni de chaîne de
+connexion, seulement des comptages avant/après par table. Deux modes :
+`--dry-run` (défaut, comptages + connectivité, aucune écriture) et `--execute` (copie réelle,
+transaction par table, `skipDuplicates: true`). Restreint dynamiquement le `select` Prisma aux
+colonnes réellement présentes sur la table source (introspection `information_schema.columns`),
+pour tolérer un schéma source en retard (ex. `PhoneOtp` inexistante, `User.accountStatus` absente
+tant que `20260926120000_add_account_lifecycle` n'est pas appliquée côté source).
+
+**Validé de bout en bout** contre un conteneur Postgres jetable local simulant Neon Development
+(jamais contre une donnée réelle) : les 39 modèles transférés dans le bon ordre, comptages
+source/cible identiques pour toutes les tables non vides (`User=1`, `DemoWorkspace=1`,
+`UploadedAsset=2`, `DemoOtp=1`, `Province=9`, `City=52`, `Neighborhood=820`, `Category=13`,
+`ServiceSubcategory=50`, `CatalogService=588`), verdict final « All tables reached at least the
+source row count. ». Prêt à être rejoué tel quel contre la vraie Neon Development dès que la base
+existe — seule variable à fournir alors : `TARGET_DATABASE_URL` (la `DIRECT_URL` Neon Development).
+
+### 14.9 Suite (bloquée sur §14.6)
+
+Une fois l'intégration installée : appliquer l'historique de migrations réparé (§13.11) sur Neon
+Development via `prisma migrate deploy`, vérifier connectivité/schéma/0 migration en attente,
+rejouer `migrate-data-to-neon.ts --dry-run` puis `--execute` contre la vraie base, puis dérouler la
+suite de tests d'intégration Account Management (§8) contre Neon Development.
+
+## 15. Plan de bascule Production — Neon (préparé, non exécuté)
+
+Ce plan est documenté à l'avance, conformément à la consigne de ne jamais toucher la Production
+existante avant que Development ne soit entièrement vert sur Neon (§14). Aucune étape ci-dessous
+n'a été exécutée.
+
+1. **Sauvegarde** : confirmer un point de restauration (backup/PITR) de la base Production actuelle
+   avant toute action — vérification manuelle dans le dashboard de l'hébergeur actuel.
+2. **Export** : export complet et horodaté de la base Production actuelle (lecture seule), conservé
+   en dehors du dépôt.
+3. **Provisionnement Neon Production** : créer la base Neon Production (variables Vercel
+   Production, jamais mélangées avec Development/Preview — §14.2/14.3).
+4. **Migration du schéma** : `prisma migrate deploy` de l'historique réparé (§13.11) contre Neon
+   Production, sur une base neuve et vide — pas de baseline/resolve nécessaire puisqu'aucune donnée
+   n'y a encore été écrite.
+5. **Migration des données** : rejouer `scripts/migrate-data-to-neon.ts` (§14.8) avec
+   `SOURCE_DATABASE_URL` pointant l'export/la Production actuelle et `TARGET_DATABASE_URL` pointant
+   Neon Production ; `--dry-run` obligatoire avant tout `--execute`.
+6. **Validation** : comparer les comptages avant/après pour chaque table (le script les affiche
+   déjà), plus un échantillon de vérifications applicatives (connexion, session, RBAC) contre Neon
+   Production **avant** bascule du trafic réel.
+7. **Bascule** : changer `DATABASE_URL`/`DIRECT_URL` de l'environnement Vercel Production pour
+   pointer Neon Production — seule cette étape rend Neon Production réellement actif pour les
+   utilisateurs.
+8. **Smoke test** : vérifications post-bascule sur l'app en production réelle (login, session,
+   pages critiques).
+9. **Rollback possible** : tant que l'ancienne base Production n'est pas supprimée (elle ne le sera
+   jamais sans confirmation explicite séparée), revenir en arrière ne demande que de restaurer les
+   anciennes variables `DATABASE_URL`/`DIRECT_URL` sur Vercel Production.
+
+Cette bascule ne sera engagée qu'après confirmation explicite, distincte de celle qui a autorisé la
+migration de Development.
