@@ -60,7 +60,7 @@ export async function POST(req:Request){
  const row=await prisma.uploadedAsset.create({data:{userId:session.user.id,name:b.name,contentType:b.contentType,size:b.size,cloud_storage_path,isPublic:false}})
  const uploadUrl=await getSignedUrl(storage,new PutObjectCommand({Bucket:bucketName,Key:cloud_storage_path,ContentType:b.contentType,ContentLength:b.size}),{expiresIn:300})
  return NextResponse.json({id:row.id,uploadUrl})
- }catch(e){console.error('Fichier Allo-Pro',e);return NextResponse.json({error:e instanceof Error?e.message:'Téléversement impossible.'},{status:400})}
+ }catch(e){console.error('Fichier Allo Pro',e);return NextResponse.json({error:e instanceof Error?e.message:'Téléversement impossible.'},{status:400})}
 }
 export async function GET(req:Request){
  const session=await auth();if(!session?.user?.id)return NextResponse.json({error:'Connexion requise.'},{status:401})

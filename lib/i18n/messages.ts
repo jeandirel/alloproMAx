@@ -40,7 +40,7 @@ const fr = {
   'nav.socials': 'Réseaux sociaux',
 
   // Shared brand copy
-  'brand.name': 'Allo-Pro',
+  'brand.name': 'Allo Pro',
   'brand.tagline': 'Le bon professionnel, au bon moment.',
 
   // Homepage hero + final CTA (app/_components/landing-page.tsx)
@@ -62,8 +62,8 @@ const fr = {
   'home.hero.illustrativeCaption': 'Portraits illustratifs · Professionnels fictifs',
   'home.ctaPro.title': 'Vous êtes un professionnel ?',
   'home.ctaPro.body': 'Présentez votre savoir-faire et découvrez comment recevoir des missions près de chez vous.',
-  'home.ctaPro.cta': 'Rejoindre Allo-Pro',
-  'home.footer.copyright': '© 2026 Allo-Pro · Pensé pour le Gabon',
+  'home.ctaPro.cta': 'Rejoindre Allo Pro',
+  'home.footer.copyright': '© 2026 Allo Pro · Pensé pour le Gabon',
 
   // Login page (app/login/login-client.tsx)
   'auth.login.title': 'Connexion',
@@ -97,7 +97,7 @@ const fr = {
 
   // Cookie consent banner (components/cookie-consent.tsx)
   'cookies.bannerLabel': 'Cookies et confidentialité',
-  'cookies.message': 'Nous utilisons des cookies pour améliorer votre expérience et mesurer l’audience de la démonstration Allo-Pro.',
+  'cookies.message': 'Nous utilisons des cookies pour améliorer votre expérience et mesurer l’audience de la démonstration Allo Pro.',
   'cookies.learnMore': 'En savoir plus',
   'cookies.accept': 'Accepter',
 } as const
@@ -118,7 +118,7 @@ const en: Record<MessageKey, string> = {
   'nav.privacy': 'Privacy',
   'nav.socials': 'Social media',
 
-  'brand.name': 'Allo-Pro',
+  'brand.name': 'Allo Pro',
   'brand.tagline': 'The right pro, right on time.',
 
   'home.demoBanner': 'Demo version · Profiles, reviews and figures are fictional · No real payments',
@@ -139,8 +139,8 @@ const en: Record<MessageKey, string> = {
   'home.hero.illustrativeCaption': 'Illustrative portraits · Fictional professionals',
   'home.ctaPro.title': 'Are you a professional?',
   'home.ctaPro.body': 'Showcase your expertise and find out how to receive jobs near you.',
-  'home.ctaPro.cta': 'Join Allo-Pro',
-  'home.footer.copyright': '© 2026 Allo-Pro · Made for Gabon',
+  'home.ctaPro.cta': 'Join Allo Pro',
+  'home.footer.copyright': '© 2026 Allo Pro · Made for Gabon',
 
   'auth.login.title': 'Log in',
   'auth.login.exploreAdmin': 'Explore the admin area (new private demo)',
@@ -170,7 +170,7 @@ const en: Record<MessageKey, string> = {
   'auth.common.genericError': 'Something went wrong',
 
   'cookies.bannerLabel': 'Cookies and privacy',
-  'cookies.message': 'We use cookies to improve your experience and measure audience on the Allo-Pro demo.',
+  'cookies.message': 'We use cookies to improve your experience and measure audience on the Allo Pro demo.',
   'cookies.learnMore': 'Learn more',
   'cookies.accept': 'Accept',
 }

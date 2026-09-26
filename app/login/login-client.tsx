@@ -36,7 +36,7 @@ export function LoginClient({ allowDemoAuth }: { allowDemoAuth: boolean }) {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
-        <Link href="/" className="text-2xl font-bold text-emerald-dark font-display mb-1">Allo-Pro</Link>
+        <Link href="/" className="text-2xl font-bold text-emerald-dark font-display mb-1">Allo Pro</Link>
         <p className="text-xs text-muted-foreground mb-8">Le bon professionnel, au bon moment.</p>
 
         <div className="w-full max-w-sm">

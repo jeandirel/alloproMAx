@@ -23,7 +23,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!checkRateLimit(`demo-admin:${ip}`, 5, 15 * 60000).allowed) return null
         if (!checkRateLimit('global:demo-admin', 50, 15 * 60000).allowed) return null
         // No global administration: this identity only owns its isolated sandbox.
-        const user = await prisma.user.create({data:{email:`${randomUUID()}@admin-demo.allopro.invalid`,name:'Administrateur Allo-Pro (démo)',role:'demo_admin'}})
+        const user = await prisma.user.create({data:{email:`${randomUUID()}@admin-demo.allopro.invalid`,name:'Administrateur Allo Pro (démo)',role:'demo_admin'}})
         return {id:user.id,email:user.email,name:user.name}
       },
     }),
@@ -43,7 +43,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!attempt.count || createHash('sha256').update(challenge.id + credentials.code).digest('hex') !== challenge.codeHash) return null
         const consumed = await prisma.demoOtp.updateMany({ where: { id: challenge.id, used: false }, data: { used: true } })
         if (!consumed.count) return null
-        const user = await prisma.user.create({ data: { email: `${randomUUID()}@otp.allopro.invalid`, name: 'Visiteur Allo-Pro', role: 'demo' } })
+        const user = await prisma.user.create({ data: { email: `${randomUUID()}@otp.allopro.invalid`, name: 'Visiteur Allo Pro', role: 'demo' } })
         return { id: user.id, email: user.email, name: user.name }
       },
     }),

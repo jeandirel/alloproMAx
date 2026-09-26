@@ -4,11 +4,11 @@ import { isDemoAuthEnabled } from '@/lib/demo-mode'
 import { LoginClient } from './login-client'
 
 export const metadata = {
-  title: 'Connexion — Allo-Pro',
-  description: 'Connectez-vous à votre compte Allo-Pro pour réserver un professionnel, suivre vos missions ou gérer votre activité.',
+  title: 'Connexion — Allo Pro',
+  description: 'Connectez-vous à votre compte Allo Pro pour réserver un professionnel, suivre vos missions ou gérer votre activité.',
   openGraph: {
-    title: 'Connexion — Allo-Pro',
-    description: 'Connectez-vous à votre compte Allo-Pro pour réserver un professionnel ou gérer votre activité.',
+    title: 'Connexion — Allo Pro',
+    description: 'Connectez-vous à votre compte Allo Pro pour réserver un professionnel ou gérer votre activité.',
   },
 }
 

@@ -21,9 +21,9 @@ export function BottomNav() {
   return (
     <nav aria-label="Navigation principale" className="ap-navigation">
       <div className="mx-auto flex max-w-6xl items-center justify-between lg:px-6">
-        <Link href="/accueil" className="hidden items-center gap-2.5 lg:flex" aria-label="Allo-Pro — Accueil">
+        <Link href="/accueil" className="hidden items-center gap-2.5 lg:flex" aria-label="Allo Pro — Accueil">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white"><ArrowUpRight size={24}/></span>
-          <span className="font-display text-xl font-extrabold tracking-tight text-primary">Allo-Pro<span className="text-gold">.</span></span>
+          <span className="font-display text-xl font-extrabold tracking-tight text-primary">Allo Pro<span className="text-gold">.</span></span>
         </Link>
         <div className="grid h-[72px] w-full grid-cols-5 items-center lg:flex lg:w-auto lg:gap-1">
           {items.map(item => {
