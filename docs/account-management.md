@@ -81,15 +81,16 @@ casser des lectures déjà en production.
 ## 4. Migration
 
 `prisma/migrations/20260926120000_add_account_lifecycle/migration.sql` — rédigée à la main (la base
-hébergée est restée injoignable depuis cet environnement pendant toute la session, ce qui empêche
-`prisma migrate dev` de passer par une shadow database). Contenu : `ALTER TABLE` additifs
-uniquement, une nouvelle table `PhoneOtp`, les index de recherche/modération, et deux
-`FOREIGN KEY` (`suspendedById`) en `ON DELETE SET NULL`. Aucun `DROP`, aucune perte de données.
+alors utilisée par les outils locaux était injoignable au moment de l'écrire, ce qui empêchait
+`prisma migrate dev` de passer par une shadow database — cause exacte identifiée depuis, voir
+§13.1). Contenu : `ALTER TABLE` additifs uniquement, une nouvelle table `PhoneOtp`, les index de
+recherche/modération, et deux `FOREIGN KEY` (`suspendedById`) en `ON DELETE SET NULL`. Aucun
+`DROP`, aucune perte de données. Audit complet, opération par opération, classé
+SAFE/CHECK_REQUIRED/RISKY : `docs/account-management-migration-review.md`.
 
-**Vérification à faire avant `prisma migrate deploy` en production** : la migration pose un index
-`UNIQUE` sur `User.phone`. Si deux comptes existants partagent déjà le même numéro non-null, la
-migration échouera — à vérifier avec une requête `SELECT phone, COUNT(*) FROM "User" WHERE phone IS
-NOT NULL GROUP BY phone HAVING COUNT(*) > 1` avant d'appliquer.
+**État** : connectivité rétablie (§13.1) ; `npm run db:preflight` exécuté avec succès contre la base
+de développement (`db.prisma.io`) — 0 doublon et 0 chaîne vide sur `User.phone`, migration non
+encore appliquée sur cette base. Voir §13.3 pour la procédure avant `prisma migrate deploy`.
 
 ## 5. Endpoints ajoutés
 
@@ -149,12 +150,22 @@ jamais un rôle lu depuis un cookie).
 données : sélection du fournisseur SMS (`lib/sms.ts`, y compris le repli sûr si `SMS_PROVIDER=twilio`
 sans identifiants), normalisation du rôle de signup, allowlist des rôles admin.
 
-**Explicitement non exécutés cette session** (nécessitent une connexion Postgres réelle — voir
-"Point ouvert" ci-dessous) : callbacks `jwt`/`session`/`signIn` de bout en bout, toutes les
-fonctions de `lib/account-lifecycle.ts`, les routes `/api/account/**`, `/api/sessions/**`,
+**Explicitement non exécutés** (nécessitent un environnement d'intégration dédié, distinct de la
+base de développement partagée utilisée par les scripts de diagnostic ci-dessous — voir §13.5) :
+callbacks `jwt`/`session`/`signIn` de bout en bout, toutes les fonctions de
+`lib/account-lifecycle.ts`, les routes `/api/account/**`, `/api/sessions/**`,
 `/api/professional/**`, `/api/admin/**`, `/api/cron/process-deletions`, et `requestPhoneOtp`. Le
 détail exact de ce qui est couvert vs. non couvert est documenté en commentaire en fin de ce
 fichier de test.
+
+**Diagnostic DB (lecture seule, jamais de migration/écriture)** :
+- `npm run db:check` — DNS, TCP, connexion Postgres réelle, latence.
+- `npm run db:preflight` — les 12 vérifications de §13.4 (DNS/IP/TCP/Postgres/statut de migration/
+  doublons `phone`/chaînes vides).
+- `npm run account:predeploy` — synthèse "SAFE TO MIGRATE" avant de lancer soi-même
+  `prisma migrate deploy` (ce script ne l'exécute jamais automatiquement).
+- `npx tsx scripts/db-network-diagnostics.ts` — DNS + classification d'IP privée/publique + TCP,
+  sans toucher à Postgres (utile quand la base elle-même est down).
 
 ## 9. Lint / build
 
@@ -175,7 +186,8 @@ admin, tests/docs).
 
 **Non déployé automatiquement.** Le pipeline existant (Vercel) n'a pas été modifié. Avant tout
 merge/déploiement production :
-1. Vérifier l'unicité de `User.phone` (section 4) puis exécuter `prisma migrate deploy`.
+1. Exécuter `npm run account:predeploy` contre la base cible (§13.3/§13.4) et obtenir
+   `SAFE TO MIGRATE: YES` avant d'exécuter soi-même `prisma migrate deploy`.
 2. Renseigner en production les variables d'environnement listées dans `.env.example`
    (`GOOGLE_CLIENT_ID`/`SECRET`, `SMS_PROVIDER`/`TWILIO_*`, `CRON_SECRET`).
 3. Ouvrir une Pull Request vers `main` pour obtenir une preview Vercel, valider manuellement les
@@ -183,10 +195,20 @@ merge/déploiement production :
 
 ## 12. Points ouverts
 
-- **Base de données hébergée injoignable** pendant toute cette session (voir mémoire projet) : la
-  migration est écrite à la main et n'a pas pu être appliquée ni testée contre une vraie instance ;
-  tous les tests d'intégration DB-dépendants restent à exécuter dès que la connectivité est
-  rétablie.
+- **Connectivité DB résolue** (voir §13 pour le diagnostic complet) : la base réellement utilisée
+  par l'application (`db.prisma.io`, Prisma Postgres) est joignable et fonctionnelle ; c'est
+  l'ancienne variable `DATABASE_URL` du fichier `.env` (base de sandbox de développement Abacus.AI,
+  réseau privé) qui ne l'était pas. La migration a été auditée et pré-validée (§13.3/§13.4) mais
+  **n'a pas été appliquée** : `prisma migrate deploy` reste une action volontaire à exécuter
+  soi-même après avoir confirmé l'environnement cible et le mécanisme de sauvegarde (§13.6).
+- **Séparation Production/Development non confirmée programmatiquement** : `DATABASE_URL` est
+  marquée "Sensitive" dans l'environnement Vercel Production (valeur jamais révélée, même à
+  l'organisation propriétaire, par conception de cette option Vercel) — impossible de vérifier par
+  un outil si elle pointe vers la même instance Prisma Postgres que Development ou vers une
+  instance séparée. Seule action manuelle nécessaire : dans le dashboard Vercel du projet
+  `allopro-m-ax` (Settings → Environment Variables), ouvrir `DATABASE_URL` pour l'environnement
+  Production et confirmer si l'hôte est bien `db.prisma.io` (même instance) ou un hôte différent —
+  sans copier la valeur elle-même hors du dashboard.
 - **Google OAuth** : les comptes créés via Google reçoivent par défaut `role: 'user'` — il n'y a
   pas de relais du rôle choisi sur `/signup` à travers la redirection OAuth (jugé disproportionné
   pour ce périmètre). Un professionnel s'inscrivant via Google doit ensuite passer par le parcours
@@ -197,3 +219,141 @@ merge/déploiement production :
   sûr par défaut, jamais un échec silencieux qui prétendrait avoir envoyé un SMS.
 - **Tableau de bord admin démo** (`components/admin-dashboard.tsx`) volontairement non relié à la
   nouvelle page de modération `/administration/comptes` — reste accessible par URL directe.
+
+## 13. Base de données — connectivité, migration et sécurité
+
+### 13.1 Database connectivity — cause racine du P1001
+
+Deux `DATABASE_URL` différentes coexistent dans ce projet, dans deux fichiers différents :
+
+| Fichier | Hôte | Nature |
+|---|---|---|
+| `.env` | `db-1614bea1d5.db007.hosteddb.reai.io` | Base de sandbox de développement fournie par **Abacus.AI** (confirmé par `AWS_BUCKET_NAME=abacusai-apps-...` dans ce même fichier) |
+| `.env.local` | `db.prisma.io` | **Prisma Postgres**, connexion directe (créé par `# Created by Vercel CLI`, tiré de l'environnement Vercel "development" du projet `allopro-m-ax`) |
+
+Preuves techniques recueillies (host masqué, IP publique non sensible) :
+- `Resolve-DnsName`/`nslookup db-1614bea1d5.db007.hosteddb.reai.io` → `172.21.254.215` — plage
+  **RFC1918 privée** (`172.16.0.0–172.31.255.255`).
+- Test TCP direct (`node net.Socket`, port 5432) vers cette IP : **TIMEOUT** après 5s — confirme
+  qu'aucune route publique n'existe vers cet hôte depuis un poste externe au réseau Abacus.AI.
+- `nslookup db.prisma.io` → `217.69.3.105` / `217.69.6.73` — IP **publiques**.
+- Test TCP vers `db.prisma.io:5432` : **connecté en ~20 ms**.
+- `npx prisma migrate status` avec `DATABASE_URL` pointée explicitement sur `db.prisma.io` :
+  connexion réussie, 3 migrations trouvées, 1 en attente (`20260926120000_add_account_lifecycle`).
+  Utilisateur Postgres retourné : `prisma_migration` — rôle dédié aux migrations, cohérent avec le
+  provisionnement standard d'une base Prisma Postgres.
+
+**Cause exacte de la confusion** (au-delà de "la base est privée") : Next.js charge `.env.local`
+avant `.env` (ordre documenté dans
+`node_modules/next/dist/docs/01-app/02-guides/environment-variables.md`), donc `next dev`/`next
+build` utilisent déjà la bonne base (`db.prisma.io`) sans aucune modification. Mais **le CLI Prisma
+et `tsx` n'appliquent pas cet ordre** : `@prisma/client` charge automatiquement `.env` (uniquement
+ce fichier) dès son import, et comme `dotenv` ne réécrit jamais une variable déjà présente dans
+`process.env`, toute tentative ultérieure de charger `.env.local` devient un no-op pour
+`DATABASE_URL`. C'est pour cela que `npx prisma migrate status` (lancé nu, sans variable
+explicite) retournait P1001 alors que l'application elle-même fonctionne normalement.
+
+**Correctif appliqué** : `scripts/lib/load-app-env.ts` reproduit l'ordre de précédence exact de
+Next.js (`process.env` > `.env.$(NODE_ENV).local` > `.env.local` > `.env.$(NODE_ENV)` > `.env`) et
+**doit être appelé avant tout import de `@prisma/client`** (voir le commentaire en tête de ce
+fichier et son usage dans `scripts/db-connectivity-check.ts`, `scripts/db-preflight.ts`,
+`scripts/account-management-predeploy.ts`, `scripts/db-network-diagnostics.ts`). Aucun fichier
+`.env*` n'a été modifié ni supprimé ; `.env` reste tel quel (il peut encore servir à autre chose,
+et le corriger à l'aveugle sortait du périmètre demandé).
+
+### 13.2 Local vs private network
+
+L'hôte Abacus.AI (`hosteddb.reai.io`) est conçu pour n'être joignable que depuis l'intérieur du
+réseau qui l'héberge (sandbox de développement Abacus.AI) — ce n'est pas une base à laquelle ce
+projet doit se connecter pour le développement local ou la production ; elle semble être un
+résidu du scaffold initial. La base réellement utilisée en développement (`db.prisma.io`, Prisma
+Postgres) est, elle, un endpoint externe officiel : documentée par Prisma, protégée par
+`sslmode=require`, avec un rôle Postgres dédié (`prisma_migration`) et une authentification par
+identifiants. Elle n'a pas été rendue publique pour les besoins de ce diagnostic — elle l'était
+déjà, par conception du produit Prisma Postgres.
+
+### 13.3 Migration preflight
+
+`npm run db:preflight` (`scripts/db-preflight.ts`) — lecture seule, 12 vérifications dans l'ordre :
+DATABASE_URL configurée → URL valide → hostname → DNS → classification IP privée/publique → port
+TCP → connexion Postgres → connectivité Prisma → statut de migration → doublons `User.phone` →
+chaînes vides `User.phone` → pointeur vers `docs/account-management-migration-review.md`. Ne lance
+jamais `migrate dev`/`deploy`/`db push`/`reset`.
+
+Résultat obtenu contre `db.prisma.io` (2026-09-26) : tous les checks bloquants au vert,
+`SAFE TO MIGRATE: YES` (1 seule base de développement, 1 utilisateur, 0 professionnel — voir
+`docs/account-management-migration-review.md` pour le détail).
+
+### 13.4 Staging migration
+
+Aucune base de "staging" distincte n'a été identifiée dans ce projet (un seul environnement Vercel
+"development" avec sa propre `DATABASE_URL`, une "Production" dont la valeur est masquée). La base
+de développement (`db.prisma.io`) a servi de validation de facto pour ce diagnostic (lecture seule
+uniquement : `SELECT`, `information_schema`, `pg_indexes` — aucune écriture, aucun DDL). Workflow
+recommandé avant toute application réelle, une fois l'environnement cible confirmé :
+`npm run account:predeploy` → confirmation manuelle de sauvegarde (§13.6) → `prisma migrate deploy`
+→ tests d'intégration → smoke tests.
+
+### 13.5 Production migration
+
+**Non exécutée.** `prisma migrate deploy` n'a été lancé contre aucune base par ce travail — la
+tentative de le faire contre la base de développement a été explicitement bloquée par les
+autorisations de l'environnement d'exécution (catégorie "Production Deploy"), ce qui est cohérent
+avec la règle du projet de ne jamais migrer sans confirmation humaine explicite. La seule action
+technique restante est de lancer `npx prisma migrate deploy` soi-même (voir "Prochaine action"
+en fin de document), après avoir tranché le point ouvert de la section 12 sur la séparation
+Production/Development.
+
+### 13.6 Rollback / recovery
+
+Aucun mécanisme de sauvegarde/PITR n'a pu être confirmé par un outil : le CLI Prisma expose bien
+des sous-commandes `prisma platform` (`--early-access`) pour la Prisma Data Platform, mais rien
+sous `environment`/`project` ne gère les sauvegardes, et aucune session authentifiée
+(`prisma platform auth login`) n'existe dans cet environnement — se connecter est une action de
+compte que ce travail n'a pas prise. **Seule action manuelle nécessaire** : dans la console Prisma
+Data Platform (console.prisma.io), sur le projet correspondant à `allopro-m-ax`, ouvrir l'onglet de
+la base `db.prisma.io` et vérifier si un point de restauration (backup/PITR) est proposé pour le
+plan actuel, avant toute migration sur une base contenant des données réelles.
+
+### 13.7 Required secrets
+
+Présence vérifiée par nom de variable uniquement (jamais la valeur) :
+
+| Variable | Présente | Effet si absente |
+|---|---|---|
+| `DATABASE_URL` | `.env` et `.env.local` (deux valeurs différentes, voir §13.1) | Build/démarrage impossible |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Non renseignées (placeholders vides dans `.env.example`) | Bouton Google masqué (`isGoogleAuthEnabled()`), aucun échec |
+| `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_FROM_NUMBER` | Non renseignées | `lib/sms.ts` retombe sur le fournisseur `console` (code journalisé serveur, jamais un vrai SMS, jamais un échec silencieux prétendant avoir envoyé) |
+| `CRON_SECRET` | À vérifier en production | `/api/cron/process-deletions` refuse (503) de s'exécuter sans elle |
+
+### 13.8 Phone uniqueness
+
+La normalisation existe déjà et est appliquée **avant** stockage, pour tout numéro saisi au
+téléphone (`app/login/actions.ts` → `lib/pawapay.ts::normalizePhone`) : accepte `074345678`,
+`74345678`, `+241 074 34 56 78`, `0024174345678` et produit systématiquement `24174345678` (indicatif
+Gabon `241`, sans `+`, sans séparateurs) — testé dans `scripts/payment-rules.test.ts`. Conséquence :
+l'index `UNIQUE` posé par la migration ne peut pas être contourné par un nouveau compte utilisant un
+format différent du même numéro ; le risque résiduel ne concerne que d'éventuelles lignes
+antérieures à l'introduction de cette normalisation, ce que `npm run db:preflight`
+(vérification n°10) détecte explicitement avant toute migration. Voir aussi
+`docs/account-management-migration-review.md` (section `User_phone_key`).
+
+### 13.9 Troubleshooting P1001
+
+```
+Error: P1001: Can't reach database server at `db-1614bea1d5.db007.hosteddb.reai.io:5432`
+```
+
+1. Ce message signifie que le CLI Prisma a résolu `DATABASE_URL` vers l'hôte Abacus.AI (sandbox de
+   développement), pas vers `db.prisma.io`. Lancer `npm run db:check` : s'il affiche
+   `DNS: PRIVATE_IP` puis `TCP: FAIL`, c'est confirmé.
+2. Cause : `.env` contient encore l'ancienne valeur, et un import direct de `@prisma/client` (ou de
+   `lib/prisma.ts`) avant `loadAppEnv()` la fige dans `process.env` avant que `.env.local` ait pu la
+   remplacer (§13.1).
+3. Correctif : utiliser les scripts fournis (`npm run db:check`, `npm run db:preflight`,
+   `npm run account:predeploy`), qui appliquent déjà le bon ordre de chargement — ou, pour une
+   commande Prisma ponctuelle, exporter `DATABASE_URL` explicitement depuis `.env.local` avant de
+   lancer la commande, plutôt que de compter sur le chargement automatique du CLI.
+4. Ce message n'indique **pas** une base cassée ou une action à corriger côté hébergeur — l'hôte
+   Abacus.AI répond simplement à un réseau différent de celui de ce poste, ce qui est son
+   fonctionnement prévu.
