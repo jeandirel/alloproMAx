@@ -8,6 +8,7 @@ import { handlePawaPayBookingDepositCallback } from '@/lib/marketplace/booking-p
 import { handlePawaPayRefundCallback } from '@/lib/marketplace/refunds'
 import { handlePawaPayPayoutCallback } from '@/lib/marketplace/payouts'
 import { isFinal } from '@/lib/payment-types'
+import { pawaPayEnvironment } from '@/lib/pawapay'
 
 const callback = z.object({ depositId: z.string().uuid().optional(), payoutId: z.string().uuid().optional(), refundId: z.string().uuid().optional() })
 
@@ -18,7 +19,11 @@ let warnedMissingCallbackSecret = false
 function verifyCallbackAuth(req: Request): boolean {
   const secret = process.env.PAWAPAY_CALLBACK_SECRET
   if (!secret) {
-    if (!warnedMissingCallbackSecret) { warnedMissingCallbackSecret = true; console.warn('PAWAPAY_CALLBACK_SECRET non configuré : les callbacks pawaPay sont acceptés sans vérification de signature (dev/sandbox uniquement).') }
+    // En mode mock (aucun jeton pawaPay configuré), aucun trafic réel n'atteint jamais cette route :
+    // permissif uniquement pour le développement local. Dès qu'un jeton réel (sandbox/production) est
+    // configuré, un secret de callback manquant doit fermer la porte plutôt que l'ouvrir.
+    if (pawaPayEnvironment() !== 'mock') return false
+    if (!warnedMissingCallbackSecret) { warnedMissingCallbackSecret = true; console.warn('PAWAPAY_CALLBACK_SECRET non configuré : les callbacks pawaPay sont acceptés sans vérification de signature (mode mock uniquement).') }
     return true
   }
   const header = req.headers.get('authorization') || ''

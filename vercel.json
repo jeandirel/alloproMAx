@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/marketplace-auto-complete",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/marketplace-reconcile",
+      "schedule": "0 * * * *"
     }
   ]
 }
