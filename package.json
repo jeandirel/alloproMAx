@@ -6,7 +6,8 @@
     "build": "prisma generate && next build --webpack",
     "start": "next start",
     "lint": "eslint .",
-    "test": "tsx scripts/marketplace-rules.test.ts && tsx scripts/payment-rules.test.ts && tsx scripts/location-rules.test.ts && tsx scripts/service-rules.test.ts && tsx scripts/account-management.test.ts",
+    "test": "tsx scripts/marketplace-rules.test.ts && tsx scripts/payment-rules.test.ts && tsx scripts/location-rules.test.ts && tsx scripts/service-rules.test.ts && tsx scripts/account-management.test.ts && tsx scripts/marketplace-transactions-rules.test.ts",
+    "test:e2e": "tsx scripts/marketplace-e2e.test.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "db:check": "tsx scripts/db-connectivity-check.ts",
     "db:preflight": "tsx scripts/db-preflight.ts",
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "@next/swc-wasm-nodejs": "16.3.3",
+    "@prisma/extension-accelerate": "^3.0.1",
     "@types/bcryptjs": "2.4.6",
     "@types/jsonwebtoken": "9.0.7",
     "@types/leaflet": "^1.9.22",

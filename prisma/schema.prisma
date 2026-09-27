@@ -81,6 +81,15 @@ model User {
   serviceSuggestionsSubmitted ServiceSuggestion[] @relation("ServiceSuggestionSubmitter")
   serviceSuggestionsReviewed  ServiceSuggestion[] @relation("ServiceSuggestionReviewer")
 
+  // Marketplace-transactions (additif) — voir bloc de modeles dedie en fin de fichier.
+  serviceRequests            ServiceRequest[]
+  contactUnlocksAsClient     ContactUnlock[]
+  paymentAttempts            PaymentAttempt[]
+  completionProofsSubmitted  CompletionProof[]
+  refundsRequested           Refund[]              @relation("RefundRequester")
+  refundsDecided             Refund[]              @relation("RefundDecider")
+  marketplaceSettingsUpdates MarketplaceSettings[]
+
   @@index([accountStatus])
   @@index([deletionScheduledAt])
 }
@@ -166,10 +175,11 @@ model UploadedAsset {
   complete           Boolean  @default(false)
   createdAt          DateTime @default(now())
 
-  document        ProfessionalDocument?
-  bookingAsset    BookingAsset?
-  disputeEvidence DisputeEvidence?
-  invoice         Invoice?
+  document                 ProfessionalDocument?
+  bookingAsset             BookingAsset?
+  disputeEvidence          DisputeEvidence?
+  invoice                  Invoice?
+  serviceRequestAttachment ServiceRequestAttachment?
 
   @@index([userId])
 }
@@ -271,6 +281,10 @@ model Category {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Override de commission plateforme pour cette categorie (marketplace-transactions) — null =
+  // herite de MarketplaceSettings.platformCommissionBps. Resolu par lib/marketplace/settings.ts.
+  commissionBpsOverride Int?
+
   professionals Professional[]
   services      Service[]
   bookings      Booking[]
@@ -280,6 +294,7 @@ model Category {
   subcategories      ServiceSubcategory[]
   catalogServices    CatalogService[]
   serviceSuggestions ServiceSuggestion[]
+  serviceRequests    ServiceRequest[]
 }
 
 model Professional {
@@ -339,6 +354,10 @@ model Professional {
   // Catalogue de services (taxonomie) — liste des CatalogService que ce
   // professionnel propose, distincte de `services` (annonces Service ci-dessus).
   professionalServices ProfessionalService[]
+
+  // Marketplace-transactions (additif) — voir bloc de modeles dedie en fin de fichier.
+  offers         Offer[]
+  contactUnlocks ContactUnlock[]
 
   @@index([categoryId])
   @@index([online])
@@ -432,6 +451,14 @@ model Booking {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
+  // Pont marketplace-transactions (additif) — renseigne uniquement pour les reservations issues
+  // du flux ServiceRequest -> Offer -> acceptation (negociation reelle), jamais pour les demandes
+  // directes existantes (serviceId). offerSnapshotId fige les montants au moment de l'acceptation :
+  // une modification ulterieure de MarketplaceSettings ne doit jamais changer cette reservation.
+  serviceRequestId String? @unique
+  offerId          String? @unique
+  offerSnapshotId  String? @unique
+
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   professional Professional  @relation(fields: [professionalId], references: [id], onDelete: Restrict)
   service      Service?      @relation(fields: [serviceId], references: [id])
@@ -439,13 +466,21 @@ model Booking {
   addressRef   Address?      @relation(fields: [addressId], references: [id])
   neighborhood Neighborhood? @relation(fields: [neighborhoodId], references: [id])
 
-  events       BookingEvent[]
-  assets       BookingAsset[]
-  dispute      Dispute?
-  review       Review?
-  payout       Payout?
-  invoice      Invoice?
-  conversation Conversation?
+  serviceRequest ServiceRequest? @relation(fields: [serviceRequestId], references: [id])
+  offer          Offer?          @relation(fields: [offerId], references: [id])
+  offerSnapshot  OfferSnapshot?  @relation(fields: [offerSnapshotId], references: [id])
+
+  events          BookingEvent[]
+  assets          BookingAsset[]
+  dispute         Dispute?
+  review          Review?
+  payout          Payout?
+  invoice         Invoice?
+  conversation    Conversation?
+  paymentAttempts PaymentAttempt[]
+  ledgerEntries   LedgerEntry[]
+  completionProof CompletionProof?
+  refunds         Refund[]
 
   @@index([userId, status, date])
   @@index([professionalId, status, date])
@@ -647,8 +682,16 @@ model Payout {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Restrict)
-  booking      Booking?     @relation(fields: [bookingId], references: [id])
+  // Marketplace-transactions (additif) — frais reel preleve par le PSP sur ce versement, connu
+  // seulement au traitement (jamais devine a l'avance). amount ci-dessus reste le net verse ;
+  // grossAmount/platformFeeAmount viennent de l'OfferSnapshot fige, providerFeeActual vient du PSP.
+  // Les tentatives de versement elles-memes sont des PaymentAttempt(bookingId, kind='payout') —
+  // pas de pointeur direct ici, meme logique que Booking qui n'en a pas non plus.
+  providerFeeActual Int? @default(0)
+
+  professional  Professional  @relation(fields: [professionalId], references: [id], onDelete: Restrict)
+  booking       Booking?      @relation(fields: [bookingId], references: [id])
+  ledgerEntries LedgerEntry[]
 
   @@index([professionalId])
   @@index([status])
@@ -758,6 +801,9 @@ model Neighborhood {
   addresses     Address[]
   bookings      Booking[]
 
+  // Marketplace-transactions (additif) — voir bloc de modeles dedie en fin de fichier.
+  serviceRequests ServiceRequest[]
+
   @@unique([cityId, normalizedName])
   @@index([cityId])
   @@index([slug])
@@ -820,9 +866,14 @@ model ServiceSubcategory {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  category    Category            @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  services    CatalogService[]
-  suggestions ServiceSuggestion[]
+  // Override de commission plateforme pour cette sous-categorie (marketplace-transactions) —
+  // priorite sur Category.commissionBpsOverride ; null = herite du niveau categorie/global.
+  commissionBpsOverride Int?
+
+  category        Category            @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  services        CatalogService[]
+  suggestions     ServiceSuggestion[]
+  serviceRequests ServiceRequest[]
 
   @@unique([categoryId, normalizedName])
   @@index([categoryId])
@@ -850,6 +901,9 @@ model CatalogService {
   subcategory    ServiceSubcategory    @relation(fields: [subcategoryId], references: [id], onDelete: Restrict)
   professionals  ProfessionalService[]
   legacyServices Service[]
+
+  // Marketplace-transactions (additif) — voir bloc de modeles dedie en fin de fichier.
+  serviceRequests ServiceRequest[]
 
   @@unique([subcategoryId, normalizedName])
   @@index([categoryId])
@@ -901,4 +955,281 @@ model ServiceSuggestion {
 
   @@index([status])
   @@index([normalizedName])
+}
+
+// =========================================================================
+// MARKETPLACE TRANSACTIONS (additif) — negociation reelle ServiceRequest -> Offer
+// -> Booking, deblocage de contact, paiements/versements reels pawaPay, grand
+// livre append-only. Entierement distinct du parcours demo investisseur
+// (DemoWorkspace / Mission JSON / PaymentTransaction ci-dessus, CONSERVE TEL
+// QUEL) : ce bloc alimente les VRAIS User/Professional/Booking relationnels.
+//
+// Principes (voir lib/marketplace/*) :
+// - Tous les montants sont des entiers (FCFA), toutes les commissions des
+//   entiers en points de base (1 bps = 0.01 %), jamais de float financier.
+// - Offer est immuable et versionnee : une renegociation cree une nouvelle
+//   ligne (version+1, previousOfferId), jamais une mutation du montant.
+// - OfferSnapshot fige les montants au moment de l'acceptation ; une
+//   modification ulterieure de MarketplaceSettings ne retroagit jamais.
+// - LedgerEntry est append-only (aucun code ne l'update ni ne le supprime).
+// =========================================================================
+
+// Configuration financiere de la plateforme — ligne unique (id fixe = 1),
+// distincte de PlatformSettings (commission en float, parcours demo) :
+// commission en points de base, entiers uniquement.
+model MarketplaceSettings {
+  id                     Int      @id @default(1)
+  platformCommissionBps  Int      @default(700) // 7% par defaut
+  contactUnlockFeeAmount Int      @default(500) // FCFA, prix par defaut d'un deblocage de contact
+  autoCompleteHours      Int      @default(48) // delai avant validation automatique d'une CompletionProof non contestee
+  currency               String   @default("XAF")
+  version                Int      @default(1) // incremente a chaque modification, tracabilite uniquement
+  updatedAt              DateTime @updatedAt
+  updatedById            String?
+
+  updatedBy User? @relation(fields: [updatedById], references: [id])
+}
+
+// Demande de service publiee par un client — point d'entree de la
+// negociation reelle (distincte de Service.select, qui reste une reservation
+// directe immediate sur une annonce existante).
+model ServiceRequest {
+  id               String    @id @default(cuid())
+  clientId         String
+  categoryId       String
+  subcategoryId    String?
+  catalogServiceId String?
+  title            String
+  description      String    @db.Text
+  address          String?
+  quartier         String?
+  neighborhoodId   String?
+  budgetMinAmount  Int?
+  budgetMaxAmount  Int?
+  urgent           Boolean   @default(false)
+  preferredDate    DateTime?
+  status           String    @default("draft") // draft | open | negotiating | awarded | closed | expired | cancelled
+  expiresAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  client         User                @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  category       Category            @relation(fields: [categoryId], references: [id])
+  subcategory    ServiceSubcategory? @relation(fields: [subcategoryId], references: [id])
+  catalogService CatalogService?     @relation(fields: [catalogServiceId], references: [id])
+  neighborhood   Neighborhood?       @relation(fields: [neighborhoodId], references: [id])
+
+  attachments ServiceRequestAttachment[]
+  offers      Offer[]
+  booking     Booking?
+
+  @@index([clientId, status])
+  @@index([categoryId, status])
+  @@index([status])
+  @@index([expiresAt])
+}
+
+// Fichiers joints a une demande (photos du probleme a resoudre, plans...).
+model ServiceRequestAttachment {
+  id               String   @id @default(cuid())
+  serviceRequestId String
+  assetId          String   @unique
+  createdAt        DateTime @default(now())
+
+  serviceRequest ServiceRequest @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade)
+  asset          UploadedAsset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@index([serviceRequestId])
+}
+
+// Proposition d'un professionnel sur une demande. IMMUABLE : une renegociation
+// (nouveau montant/message) cree une nouvelle ligne (version+1, previousOfferId)
+// au lieu de modifier amount/message sur la ligne existante ; seul `status`
+// est mute (transitions validees par lib/marketplace/state-machine.ts).
+model Offer {
+  id               String    @id @default(cuid())
+  serviceRequestId String
+  professionalId   String
+  version          Int       @default(1)
+  previousOfferId  String?   @unique
+  amount           Int
+  message          String?   @db.Text
+  status           String    @default("pending") // pending | accepted | rejected | withdrawn | expired | superseded
+  expiresAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  serviceRequest ServiceRequest @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade)
+  professional   Professional   @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  previousOffer  Offer?         @relation("OfferRevision", fields: [previousOfferId], references: [id])
+  nextOffer      Offer?         @relation("OfferRevision")
+  snapshot       OfferSnapshot?
+  booking        Booking?
+
+  @@index([serviceRequestId, status])
+  @@index([professionalId, status])
+}
+
+// Photographie financiere immuable prise au moment de l'acceptation d'une
+// Offer — seule source de verite pour les montants d'une reservation issue de
+// la negociation reelle, jamais recalculee apres coup.
+model OfferSnapshot {
+  id                    String   @id @default(cuid())
+  offerId               String   @unique
+  grossAmount           Int
+  currency              String   @default("XAF")
+  platformCommissionBps Int
+  platformFeeAmount     Int
+  professionalNetAmount Int
+  settingsVersion       Int
+  createdAt             DateTime @default(now())
+
+  offer   Offer    @relation(fields: [offerId], references: [id], onDelete: Restrict)
+  booking Booking?
+
+  @@index([offerId])
+}
+
+// Deblocage payant des coordonnees d'un professionnel par un client, avant
+// toute reservation. Feature-flagge par CONTACT_UNLOCK_ENABLED (lib/marketplace/flags.ts).
+model ContactUnlock {
+  id             String    @id @default(cuid())
+  clientId       String
+  professionalId String
+  amount         Int
+  currency       String    @default("XAF")
+  status         String    @default("pending") // pending | paid | failed | refunded
+  unlockedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  client          User             @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  professional    Professional     @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  paymentAttempts PaymentAttempt[]
+  ledgerEntries   LedgerEntry[]
+
+  @@index([clientId, professionalId])
+  @@index([professionalId, status])
+}
+
+// Tentative de paiement/versement/remboursement REEL pawaPay, ratachee a une
+// vraie Booking ou a un ContactUnlock (jamais aux deux). Distinct de
+// PaymentTransaction (demo, missionId JSON) meme forme de champs pour
+// reutiliser lib/pawapay.ts sans dupliquer sa logique.
+model PaymentAttempt {
+  id              String    @id
+  userId          String
+  bookingId       String?
+  contactUnlockId String?
+  kind            String // deposit | payout | refund
+  attempt         Int
+  mode            String // sandbox | production — jamais 'mock' ici (reserve au parcours demo)
+  status          String    @default("CREATED")
+  amount          Int
+  currency        String    @default("XAF")
+  provider        String
+  phoneNumber     String
+  depositId       String? // encaissement source, pour un refund
+  failureCode     String?
+  checkedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Restrict)
+  booking       Booking?       @relation(fields: [bookingId], references: [id])
+  contactUnlock ContactUnlock? @relation(fields: [contactUnlockId], references: [id])
+
+  providerEvents PaymentProviderEvent[]
+  ledgerEntries  LedgerEntry[]
+
+  @@unique([bookingId, kind, attempt])
+  @@unique([contactUnlockId, kind, attempt])
+  @@index([status])
+  @@index([userId])
+}
+
+// Journal des evenements/callbacks recus d'un PSP (pawaPay) — idempotence via
+// (provider, providerEventId) : une meme livraison repetee d'un webhook ne
+// produit jamais de double effet. providerEventId est construit par notre
+// code (ex. `${referenceId}:${status}`), pas fourni tel quel par pawaPay.
+model PaymentProviderEvent {
+  id               String   @id @default(cuid())
+  provider         String // pawapay
+  providerEventId  String
+  paymentAttemptId String?
+  payload          Json?
+  receivedAt       DateTime @default(now())
+
+  paymentAttempt PaymentAttempt? @relation(fields: [paymentAttemptId], references: [id])
+
+  @@unique([provider, providerEventId])
+  @@index([paymentAttemptId])
+}
+
+// Grand livre financier append-only — jamais mis a jour ni supprime par le
+// code applicatif. Une ligne par mouvement (commission plateforme, versement
+// professionnel, remboursement, frais de deblocage de contact, frais PSP reel).
+model LedgerEntry {
+  id               String   @id @default(cuid())
+  bookingId        String?
+  contactUnlockId  String?
+  payoutId         String?
+  paymentAttemptId String?
+  type             String // platform_fee | professional_payout | refund | contact_unlock_fee | provider_fee_actual
+  amount           Int // signe : positif = entrant plateforme, negatif = sortant
+  currency         String   @default("XAF")
+  description      String?  @db.Text
+  createdAt        DateTime @default(now())
+
+  booking        Booking?        @relation(fields: [bookingId], references: [id])
+  contactUnlock  ContactUnlock?  @relation(fields: [contactUnlockId], references: [id])
+  payout         Payout?         @relation(fields: [payoutId], references: [id])
+  paymentAttempt PaymentAttempt? @relation(fields: [paymentAttemptId], references: [id])
+
+  @@index([bookingId])
+  @@index([contactUnlockId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// Preuve de fin d'intervention soumise par le professionnel — declenche le
+// delai de validation automatique (auto-completion) si le client ne reagit pas.
+// Les fichiers eux-memes reutilisent BookingAsset (kind = 'completion_proof').
+model CompletionProof {
+  id                   String    @id @default(cuid())
+  bookingId            String    @unique
+  submittedById        String
+  autoCompleteDeadline DateTime
+  clientConfirmedAt    DateTime?
+  autoCompletedAt      DateTime?
+  createdAt            DateTime  @default(now())
+
+  booking     Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  submittedBy User    @relation(fields: [submittedById], references: [id])
+
+  @@index([autoCompleteDeadline])
+}
+
+// Demande de remboursement au niveau metier — distincte de la tentative de
+// paiement PaymentAttempt(kind='refund') qui l'execute reellement une fois
+// approuvee.
+model Refund {
+  id             String    @id @default(cuid())
+  bookingId      String
+  requestedById  String
+  reason         String    @db.Text
+  amount         Int
+  status         String    @default("requested") // requested | approved | rejected | processing | completed | failed
+  decidedById    String?
+  decidedAt      DateTime?
+  decisionReason String?   @db.Text
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  booking     Booking @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  requestedBy User    @relation("RefundRequester", fields: [requestedById], references: [id])
+  decidedBy   User?   @relation("RefundDecider", fields: [decidedById], references: [id])
+
+  @@index([bookingId])
+  @@index([status])
 }

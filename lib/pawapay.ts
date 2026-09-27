@@ -89,3 +89,81 @@ export async function checkStatus(t: PaymentTransaction) {
   if (t.mode !== 'sandbox' || paymentMode() !== 'sandbox') throw new Error('Configurez la clé sandbox pour vérifier cette transaction.')
   return verifyStatus(await api(`/${t.kind}s/${encodeURIComponent(t.id)}`), t)
 }
+
+// ---- Marketplace transactionnel réel (PaymentAttempt) ------------------------------------------
+// Tout ce qui précède reste la démo investisseur : verrouillée sandbox/mock par paymentMode(), jamais
+// touchée ici. Le marketplace réel a sa propre notion d'environnement (autorise 'production') et sa
+// propre forme de transaction (clientReferenceId générique au lieu de missionId) ; il réutilise les
+// schémas de validation zod et le format d'appel ci-dessus sans jamais pouvoir emprunter le verrou demo.
+const PRODUCTION = 'https://api.pawapay.io/v2'
+const PAWAPAY_BASE_URL: Record<'sandbox' | 'production', string> = { sandbox: SANDBOX, production: PRODUCTION }
+export type PawaPayEnvironment = 'mock' | 'sandbox' | 'production'
+
+// Distinct de paymentMode() : le marketplace réel peut atteindre 'production' une fois une clé LIVE
+// posée dans Vercel ; la démo investisseur reste verrouillée sandbox/mock quoi qu'il arrive (voir plus haut).
+export function pawaPayEnvironment(): PawaPayEnvironment {
+  const environment = process.env.PAWAPAY_ENVIRONMENT || 'sandbox'
+  if (environment === 'mock' || !process.env.PAWAPAY_API_TOKEN?.trim()) return 'mock'
+  return environment === 'production' ? 'production' : 'sandbox'
+}
+
+export type PawaPayTransactionLike = {
+  id: string
+  kind: PaymentKind
+  amount: number
+  currency: string
+  clientReferenceId: string
+  phoneNumber: string
+  provider: string
+  depositId: string | null
+}
+
+async function apiRequest(baseUrl: string, path: string, body?: unknown): Promise<unknown> {
+  let response: Response
+  try {
+    response = await fetch(`${baseUrl}${path}`, { method: body ? 'POST' : 'GET', headers: { Authorization: `Bearer ${process.env.PAWAPAY_API_TOKEN}`, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined, cache: 'no-store', signal: AbortSignal.timeout(15000), redirect: 'error' })
+  } catch { throw new ProviderError('pawaPay ne répond pas. Le résultat reste à vérifier, sans nouveau débit automatique.', 'NETWORK') }
+  if (!response.ok) {
+    const message = [401,403].includes(response.status) ? 'Vérifiez la clé pawaPay et ses autorisations.' : response.status === 429 ? 'pawaPay limite temporairement les demandes. Réessayez plus tard.' : 'Réponse pawaPay indisponible. Actualisez le statut avant toute nouvelle tentative.'
+    throw new ProviderError(message, `HTTP_${response.status}`)
+  }
+  try { return await response.json() } catch { throw new ProviderError('Réponse pawaPay illisible. Vérification requise.', 'INVALID_RESPONSE') }
+}
+
+function buildTransactionBody(t: PawaPayTransactionLike) {
+  const common = { amount: String(t.amount), currency: t.currency, clientReferenceId: t.clientReferenceId }
+  if (t.kind === 'refund') {
+    if (!t.depositId) throw new Error('Encaissement source manquant.')
+    return { ...common, refundId: t.id, depositId: t.depositId }
+  }
+  const account = { type: 'MMO', accountDetails: { phoneNumber: t.phoneNumber, provider: t.provider } }
+  if (t.kind === 'deposit') return { ...common, depositId: t.id, payer: account, customerMessage: 'Allo Pro' }
+  if (t.kind === 'payout') return { ...common, payoutId: t.id, recipient: account, customerMessage: 'Allo Pro' }
+  throw new Error('Opération inconnue.')
+}
+
+export async function fetchPawaPayActiveConfig(environment: 'sandbox' | 'production'): Promise<unknown> {
+  return apiRequest(PAWAPAY_BASE_URL[environment], '/active-conf?country=GAB')
+}
+
+export async function initiatePawaPayTransaction(t: PawaPayTransactionLike, environment: 'sandbox' | 'production'): Promise<{ status: TransactionStatus; failureCode: string | null }> {
+  const parsed = initiation.parse(await apiRequest(PAWAPAY_BASE_URL[environment], `/${t.kind}s`, buildTransactionBody(t)))
+  if (parsed[`${t.kind}Id` as 'depositId' | 'payoutId' | 'refundId'] !== t.id) throw new ProviderError('Identifiant pawaPay incohérent.', 'MISMATCH')
+  return { status: parsed.status === 'DUPLICATE_IGNORED' ? 'UNKNOWN' : parsed.status, failureCode: parsed.failureReason?.failureCode?.slice(0, 100) || null }
+}
+
+export function verifyPawaPayStatus(raw: unknown, t: PawaPayTransactionLike): { status: TransactionStatus; failureCode: string | null } | null {
+  const result = statusResponse.parse(raw)
+  if (result.status === 'NOT_FOUND') return null
+  const d = result.data
+  if (!d || d[`${t.kind}Id`] !== t.id || d.currency !== t.currency || typeof d.amount !== 'string' || !/^\d+(\.\d{1,2})?$/.test(d.amount) || Number(d.amount) !== t.amount) throw new ProviderError('Les références ou le montant pawaPay ne correspondent pas à la transaction.', 'MISMATCH')
+  if (t.kind === 'refund' && d.depositId !== undefined && d.depositId !== t.depositId) throw new ProviderError('Remboursement sans encaissement source correspondant.', 'MISMATCH')
+  const account = z.object({ type: z.literal('MMO'), accountDetails: z.object({ phoneNumber: z.string(), provider: z.string() }) }).parse(d[t.kind === 'deposit' ? 'payer' : 'recipient'])
+  if (account.accountDetails.phoneNumber !== t.phoneNumber || account.accountDetails.provider !== t.provider) throw new ProviderError('Compte Mobile Money incohérent.', 'MISMATCH')
+  const failure = z.object({ failureCode: z.string() }).safeParse(d.failureReason)
+  return { status: statusValue.parse(d.status), failureCode: failure.success ? failure.data.failureCode.slice(0, 100) : null }
+}
+
+export async function checkPawaPayStatus(t: PawaPayTransactionLike, environment: 'sandbox' | 'production') {
+  return verifyPawaPayStatus(await apiRequest(PAWAPAY_BASE_URL[environment], `/${t.kind}s/${encodeURIComponent(t.id)}`), t)
+}
