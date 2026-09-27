@@ -11,5 +11,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const { id } = await params
   const booking = await getBookingForViewer(session.user.id, id)
   if (!booking) return NextResponse.json({ error: 'Réservation introuvable.' }, { status: 404, headers })
-  return NextResponse.json({ booking: publicBooking(booking) }, { headers })
+  const viewerRole = booking.userId === session.user.id ? 'client' : 'professionnel'
+  return NextResponse.json({ booking: publicBooking(booking), viewerRole }, { headers })
 }
