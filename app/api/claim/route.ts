@@ -9,32 +9,30 @@ export async function POST(req: NextRequest) {
   const variant = String(body.variant || "").trim().slice(0, 100);
   const level = String(body.level || "").trim().slice(0, 50);
   const contributorId = String(body.contributorId || "").trim().slice(0, 120);
+  const questionId = Number(body.questionId);
 
-  if (!name || !variant || !level || !contributorId) {
-    return NextResponse.json({ error: "Profil incomplet." }, { status: 400 });
+  if (!name || !variant || !level || !contributorId || !Number.isInteger(questionId) || questionId < 1 || questionId > 200) {
+    return NextResponse.json({ error: "Profil ou question invalide." }, { status: 400 });
   }
 
   const { db } = bindings();
   await ensureDb(db);
   await releaseExpired(db);
 
-  for (let attempt = 0; attempt < 4; attempt++) {
-    const token = crypto.randomUUID();
-    const task = await db.prepare(`
-      UPDATE questions
-      SET status='claimed', claim_token=?, claimed_by=?, claimed_name=?,
-          claimed_variant=?, claimed_level=?, claimed_at=datetime('now')
-      WHERE id = (
-        SELECT id FROM questions WHERE status='available' ORDER BY RANDOM() LIMIT 1
-      )
-      AND status='available'
-      RETURNING id, category, intent, question_fr, answer_fr, claim_token, claimed_at
-    `).bind(token, contributorId, name, variant, level).first();
+  const token = crypto.randomUUID();
+  const task = await db.prepare(`
+    UPDATE questions
+    SET status='claimed', claim_token=?, claimed_by=?, claimed_name=?,
+        claimed_variant=?, claimed_level=?, claimed_at=datetime('now')
+    WHERE id=? AND status='available'
+    RETURNING id, category, intent, question_fr, answer_fr, claim_token, claimed_at
+  `).bind(token, contributorId, name, variant, level, questionId).first();
 
-    if (task) {
-      return NextResponse.json({ task }, { headers: { "Cache-Control": "no-store" } });
-    }
+  if (!task) {
+    return NextResponse.json({
+      error: "Cette question vient d'être prise ou a déjà été terminée. Choisissez-en une autre."
+    }, { status: 409 });
   }
 
-  return NextResponse.json({ error: "Toutes les questions sont déjà prises ou terminées." }, { status: 409 });
+  return NextResponse.json({ task }, { headers: { "Cache-Control": "no-store" } });
 }
