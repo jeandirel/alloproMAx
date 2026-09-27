@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { formatFCFA } from '@/lib/data'
 import { serviceRequestStatus, offerStatus } from '@/lib/marketplace-ui/status'
 import { StatusPillFor } from '@/components/marketplace/status-pill'
+import { ContactUnlockPanel } from '@/components/marketplace/contact-unlock-panel'
 
 type ClientOffer = {
   id: string
@@ -216,6 +217,7 @@ export function DemandeDetailClient({ serviceRequestId }: { serviceRequestId: st
                 </div>
                 <p className="mt-2 text-lg font-bold text-emerald-900">{formatFCFA(offer.amount)}</p>
                 {offer.message && <p className="mt-1 text-sm text-gray-600">{offer.message}</p>}
+                <ContactUnlockPanel professionalId={offer.professional.id} />
                 {offer.status === 'pending' && (
                   <div className="mt-3 flex gap-2">
                     <button disabled={busy === offer.id} onClick={() => acceptOffer(offer.id)} className="ap-button flex-1 text-sm">

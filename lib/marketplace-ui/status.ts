@@ -71,6 +71,13 @@ export const disputeStatus: StatusMap = {
   resolu: { label: 'Résolu', tone: 'success' },
 }
 
+export const contactUnlockStatus: StatusMap = {
+  pending: { label: 'En attente de paiement', tone: 'warning' },
+  paid: { label: 'Débloqué', tone: 'success' },
+  failed: { label: 'Échoué', tone: 'danger' },
+  refunded: { label: 'Remboursé', tone: 'neutral' },
+}
+
 export const refundStatus: StatusMap = {
   requested: { label: 'Demandé', tone: 'warning' },
   approved: { label: 'Approuvé', tone: 'info' },
