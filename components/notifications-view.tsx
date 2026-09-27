@@ -1,0 +1,5 @@
+'use client'
+import Link from 'next/link'
+import {useWorkspace,WorkspaceLoading} from './workspace-provider'
+import {PageHeading,Empty} from './market-ui'
+export function NotificationsView(){const {state,act,busy}=useWorkspace();if(!state)return <WorkspaceLoading/>;const list=state.notifications.filter(n=>n.role===state.role&&(!n.proId||n.proId===state.activeProId));return <div className="ap-page max-w-3xl"><PageHeading title="Notifications" subtitle="Les événements importants de votre espace, sans notifications push externes."/><button className="ap-secondary mb-5" disabled={busy||!list.some(n=>!n.read)} onClick={()=>void act({type:'read'})}>Tout marquer comme lu</button>{list.length?<div className="space-y-3">{list.map(n=><Link key={n.id} href={n.href} className={`ap-panel block ${!n.read?'border-l-4 border-l-emerald-600':''}`}><p className={n.read?'text-muted-foreground':'font-semibold'}>{n.text}</p><p className="text-xs text-muted-foreground mt-2">{new Date(n.at).toLocaleString('fr-FR',{timeZone:'Africa/Libreville',dateStyle:'short',timeStyle:'short'})}</p></Link>)}</div>:<Empty text="Vous êtes à jour. Aucune notification pour le moment."/>}</div>}

@@ -1,0 +1,7 @@
+'use client'
+import {useState} from 'react'
+import {useSearchParams} from 'next/navigation'
+import {useWorkspace,WorkspaceLoading} from './workspace-provider'
+import {PageHeading,Empty} from './market-ui'
+import {ChatThread} from './chat-thread'
+export function MessagesView(){const {state}=useWorkspace();const params=useSearchParams();const [selected,setSelected]=useState(params.get('thread')||'');if(!state)return <WorkspaceLoading/>;const missions=state.missions.filter(m=>state.role!=='professionnel'||m.professionalId===state.activeProId);const direct=state.pros.filter(p=>(state.messages.some(m=>m.thread===`PRO-${p.id}`)||selected===`PRO-${p.id}`)&&(state.role!=='professionnel'||p.id===state.activeProId)).map(p=>({id:`PRO-${p.id}`,label:p.name}));const threads=[...missions.map(m=>({id:m.id,label:`${m.service} · ${m.id}`})),...direct];const thread=threads.find(t=>t.id===selected)?.id||threads[0]?.id;return <div className="ap-page"><PageHeading title="Vos messages" subtitle="Un échange clair, avant, pendant et après l’intervention."/>{!threads.length?<Empty text="Vos conversations apparaîtront ici." href="/recherche"/>:<div className="grid md:grid-cols-[260px_1fr] gap-5"><nav className="space-y-2 max-h-96 overflow-auto" aria-label="Conversations">{threads.map(t=><button key={t.id} onClick={()=>setSelected(t.id)} className={`w-full text-left rounded-xl px-4 py-3 text-sm ${thread===t.id?'bg-emerald-dark text-white':'bg-white shadow-sm'}`}>{t.label}</button>)}</nav><ChatThread key={thread} thread={thread}/></div>}</div>}

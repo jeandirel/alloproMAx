@@ -1,0 +1,5115 @@
+{
+  "categories": [
+    {
+      "category": "Maison & Travaux",
+      "subcategories": [
+        {
+          "subcategory": "Plomberie",
+          "services": [
+            {
+              "name": "Fuite d'eau",
+              "keywords": [
+                "fuite d eau",
+                "fuite",
+                "plombier"
+              ]
+            },
+            {
+              "name": "Débouchage canalisation",
+              "keywords": [
+                "debouchage canalisation",
+                "debouchage",
+                "canalisation",
+                "plombier"
+              ]
+            },
+            {
+              "name": "Installation robinet",
+              "keywords": [
+                "installation robinet",
+                "installation",
+                "robinet",
+                "plombier"
+              ]
+            },
+            {
+              "name": "Installation WC",
+              "keywords": [
+                "installation wc",
+                "installation",
+                "plombier"
+              ]
+            },
+            {
+              "name": "Réparation WC",
+              "keywords": [
+                "reparation wc",
+                "reparation",
+                "plombier"
+              ]
+            },
+            {
+              "name": "Installation douche",
+              "keywords": [
+                "installation douche",
+                "installation",
+                "douche",
+                "plombier"
+              ]
+            },
+            {
+              "name": "Installation baignoire",
+              "keywords": [
+                "installation baignoire",
+                "installation",
+                "baignoire",
+                "plombier"
+              ]
+            },
+            {
+              "name": "Installation chauffe-eau",
+              "keywords": [
+                "installation chauffe eau",
+                "installation",
+                "chauffe",
+                "plombier"
+              ]
+            },
+            {
+              "name": "Réparation chauffe-eau",
+              "keywords": [
+                "reparation chauffe eau",
+                "reparation",
+                "chauffe",
+                "plombier"
+              ]
+            },
+            {
+              "name": "Installation pompe à eau",
+              "keywords": [
+                "installation pompe a eau",
+                "installation",
+                "pompe",
+                "plombier"
+              ]
+            },
+            {
+              "name": "Réservoir / château d'eau",
+              "keywords": [
+                "reservoir / chateau d eau",
+                "reservoir",
+                "chateau",
+                "plombier"
+              ]
+            },
+            {
+              "name": "Installation tuyauterie",
+              "keywords": [
+                "installation tuyauterie",
+                "installation",
+                "tuyauterie",
+                "plombier"
+              ]
+            },
+            {
+              "name": "Recherche de fuite",
+              "keywords": [
+                "recherche de fuite",
+                "recherche",
+                "fuite",
+                "plombier"
+              ]
+            },
+            {
+              "name": "Assainissement",
+              "keywords": [
+                "assainissement",
+                "plombier"
+              ]
+            },
+            {
+              "name": "Vidange fosse septique",
+              "keywords": [
+                "vidange fosse septique",
+                "vidange",
+                "fosse",
+                "septique",
+                "plombier"
+              ]
+            },
+            {
+              "name": "Débouchage WC",
+              "keywords": [
+                "debouchage wc",
+                "debouchage",
+                "plombier"
+              ]
+            },
+            {
+              "name": "Urgence plomberie",
+              "keywords": [
+                "urgence plomberie",
+                "urgence",
+                "plomberie",
+                "plombier"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Électricité",
+          "services": [
+            {
+              "name": "Dépannage électrique",
+              "keywords": [
+                "depannage electrique",
+                "depannage",
+                "electrique",
+                "electricien"
+              ]
+            },
+            {
+              "name": "Installation électrique",
+              "keywords": [
+                "installation electrique",
+                "installation",
+                "electrique",
+                "electricien"
+              ]
+            },
+            {
+              "name": "Prise électrique",
+              "keywords": [
+                "prise electrique",
+                "prise",
+                "electrique",
+                "electricien"
+              ]
+            },
+            {
+              "name": "Interrupteur",
+              "keywords": [
+                "interrupteur",
+                "electricien"
+              ]
+            },
+            {
+              "name": "Tableau électrique",
+              "keywords": [
+                "tableau electrique",
+                "tableau",
+                "electrique",
+                "electricien"
+              ]
+            },
+            {
+              "name": "Disjoncteur",
+              "keywords": [
+                "disjoncteur",
+                "electricien"
+              ]
+            },
+            {
+              "name": "Éclairage intérieur",
+              "keywords": [
+                "eclairage interieur",
+                "eclairage",
+                "interieur",
+                "electricien"
+              ]
+            },
+            {
+              "name": "Éclairage extérieur",
+              "keywords": [
+                "eclairage exterieur",
+                "eclairage",
+                "exterieur",
+                "electricien"
+              ]
+            },
+            {
+              "name": "Installation compteur",
+              "keywords": [
+                "installation compteur",
+                "installation",
+                "compteur",
+                "electricien"
+              ]
+            },
+            {
+              "name": "Mise aux normes",
+              "keywords": [
+                "mise aux normes",
+                "mise",
+                "normes",
+                "electricien"
+              ]
+            },
+            {
+              "name": "Câblage maison",
+              "keywords": [
+                "cablage maison",
+                "cablage",
+                "maison",
+                "electricien"
+              ]
+            },
+            {
+              "name": "Court-circuit",
+              "keywords": [
+                "court circuit",
+                "court",
+                "circuit",
+                "electricien"
+              ]
+            },
+            {
+              "name": "Installation groupe électrogène",
+              "keywords": [
+                "installation groupe electrogene",
+                "installation",
+                "groupe",
+                "electrogene",
+                "electricien"
+              ]
+            },
+            {
+              "name": "Installation inverseur",
+              "keywords": [
+                "installation inverseur",
+                "installation",
+                "inverseur",
+                "electricien"
+              ]
+            },
+            {
+              "name": "Installation solaire",
+              "keywords": [
+                "installation solaire",
+                "installation",
+                "solaire",
+                "electricien"
+              ]
+            },
+            {
+              "name": "Onduleur",
+              "keywords": [
+                "onduleur",
+                "electricien"
+              ]
+            },
+            {
+              "name": "Batterie solaire",
+              "keywords": [
+                "batterie solaire",
+                "batterie",
+                "solaire",
+                "electricien"
+              ]
+            },
+            {
+              "name": "Maintenance électrique",
+              "keywords": [
+                "maintenance electrique",
+                "maintenance",
+                "electrique",
+                "electricien"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Climatisation & froid",
+          "services": [
+            {
+              "name": "Installation climatiseur",
+              "keywords": [
+                "installation climatiseur",
+                "installation",
+                "climatiseur",
+                "climatisation"
+              ]
+            },
+            {
+              "name": "Réparation climatiseur",
+              "keywords": [
+                "reparation climatiseur",
+                "reparation",
+                "climatiseur",
+                "climatisation"
+              ]
+            },
+            {
+              "name": "Entretien climatiseur",
+              "keywords": [
+                "entretien climatiseur",
+                "entretien",
+                "climatiseur",
+                "climatisation"
+              ]
+            },
+            {
+              "name": "Nettoyage climatiseur",
+              "keywords": [
+                "nettoyage climatiseur",
+                "nettoyage",
+                "climatiseur",
+                "climatisation"
+              ]
+            },
+            {
+              "name": "Recharge gaz climatiseur",
+              "keywords": [
+                "recharge gaz climatiseur",
+                "recharge",
+                "climatiseur",
+                "climatisation"
+              ]
+            },
+            {
+              "name": "Installation chambre froide",
+              "keywords": [
+                "installation chambre froide",
+                "installation",
+                "chambre",
+                "froide",
+                "climatisation"
+              ]
+            },
+            {
+              "name": "Réparation chambre froide",
+              "keywords": [
+                "reparation chambre froide",
+                "reparation",
+                "chambre",
+                "froide",
+                "climatisation"
+              ]
+            },
+            {
+              "name": "Réparation réfrigérateur",
+              "keywords": [
+                "reparation refrigerateur",
+                "reparation",
+                "refrigerateur",
+                "climatisation"
+              ]
+            },
+            {
+              "name": "Réparation congélateur",
+              "keywords": [
+                "reparation congelateur",
+                "reparation",
+                "congelateur",
+                "climatisation"
+              ]
+            },
+            {
+              "name": "Maintenance froid commercial",
+              "keywords": [
+                "maintenance froid commercial",
+                "maintenance",
+                "froid",
+                "commercial",
+                "climatisation"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Maçonnerie & construction",
+          "services": [
+            {
+              "name": "Maçon",
+              "keywords": [
+                "macon"
+              ]
+            },
+            {
+              "name": "Construction maison",
+              "keywords": [
+                "construction maison",
+                "construction",
+                "maison",
+                "macon"
+              ]
+            },
+            {
+              "name": "Fondation",
+              "keywords": [
+                "fondation",
+                "macon"
+              ]
+            },
+            {
+              "name": "Dalle",
+              "keywords": [
+                "dalle",
+                "macon"
+              ]
+            },
+            {
+              "name": "Mur",
+              "keywords": [
+                "mur",
+                "macon"
+              ]
+            },
+            {
+              "name": "Crépi",
+              "keywords": [
+                "crepi",
+                "macon"
+              ]
+            },
+            {
+              "name": "Parpaing",
+              "keywords": [
+                "parpaing",
+                "macon"
+              ]
+            },
+            {
+              "name": "Béton",
+              "keywords": [
+                "beton",
+                "macon"
+              ]
+            },
+            {
+              "name": "Rénovation bâtiment",
+              "keywords": [
+                "renovation batiment",
+                "renovation",
+                "batiment",
+                "macon"
+              ]
+            },
+            {
+              "name": "Extension maison",
+              "keywords": [
+                "extension maison",
+                "extension",
+                "maison",
+                "macon"
+              ]
+            },
+            {
+              "name": "Terrasse",
+              "keywords": [
+                "terrasse",
+                "macon"
+              ]
+            },
+            {
+              "name": "Escalier béton",
+              "keywords": [
+                "escalier beton",
+                "escalier",
+                "beton",
+                "macon"
+              ]
+            },
+            {
+              "name": "Clôture",
+              "keywords": [
+                "cloture",
+                "macon"
+              ]
+            },
+            {
+              "name": "Construction garage",
+              "keywords": [
+                "construction garage",
+                "construction",
+                "garage",
+                "macon"
+              ]
+            },
+            {
+              "name": "Construction boutique",
+              "keywords": [
+                "construction boutique",
+                "construction",
+                "boutique",
+                "macon"
+              ]
+            },
+            {
+              "name": "Construction immeuble",
+              "keywords": [
+                "construction immeuble",
+                "construction",
+                "immeuble",
+                "macon"
+              ]
+            },
+            {
+              "name": "Chef de chantier",
+              "keywords": [
+                "chef de chantier",
+                "chef",
+                "chantier",
+                "macon"
+              ]
+            },
+            {
+              "name": "Conducteur de travaux",
+              "keywords": [
+                "conducteur de travaux",
+                "conducteur",
+                "travaux",
+                "macon"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Peinture & décoration",
+          "services": [
+            {
+              "name": "Peinture intérieure",
+              "keywords": [
+                "peinture interieure",
+                "peinture",
+                "interieure",
+                "peintre"
+              ]
+            },
+            {
+              "name": "Peinture extérieure",
+              "keywords": [
+                "peinture exterieure",
+                "peinture",
+                "exterieure",
+                "peintre"
+              ]
+            },
+            {
+              "name": "Peinture façade",
+              "keywords": [
+                "peinture facade",
+                "peinture",
+                "facade",
+                "peintre"
+              ]
+            },
+            {
+              "name": "Enduit",
+              "keywords": [
+                "enduit",
+                "peintre"
+              ]
+            },
+            {
+              "name": "Papier peint",
+              "keywords": [
+                "papier peint",
+                "papier",
+                "peint",
+                "peintre"
+              ]
+            },
+            {
+              "name": "Décoration murale",
+              "keywords": [
+                "decoration murale",
+                "decoration",
+                "murale",
+                "peintre"
+              ]
+            },
+            {
+              "name": "Faux plafond",
+              "keywords": [
+                "faux plafond",
+                "faux",
+                "plafond",
+                "peintre"
+              ]
+            },
+            {
+              "name": "Staff",
+              "keywords": [
+                "staff",
+                "peintre"
+              ]
+            },
+            {
+              "name": "Corniches",
+              "keywords": [
+                "corniches",
+                "peintre"
+              ]
+            },
+            {
+              "name": "Décoration intérieure",
+              "keywords": [
+                "decoration interieure",
+                "decoration",
+                "interieure",
+                "peintre"
+              ]
+            },
+            {
+              "name": "Home staging",
+              "keywords": [
+                "home staging",
+                "home",
+                "staging",
+                "peintre"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Carrelage & sols",
+          "services": [
+            {
+              "name": "Pose carrelage",
+              "keywords": [
+                "pose carrelage",
+                "pose",
+                "carrelage",
+                "carreleur"
+              ]
+            },
+            {
+              "name": "Pose faïence",
+              "keywords": [
+                "pose faience",
+                "pose",
+                "faience",
+                "carreleur"
+              ]
+            },
+            {
+              "name": "Pose parquet",
+              "keywords": [
+                "pose parquet",
+                "pose",
+                "parquet",
+                "carreleur"
+              ]
+            },
+            {
+              "name": "Pose sol PVC",
+              "keywords": [
+                "pose sol pvc",
+                "pose",
+                "carreleur"
+              ]
+            },
+            {
+              "name": "Pose moquette",
+              "keywords": [
+                "pose moquette",
+                "pose",
+                "moquette",
+                "carreleur"
+              ]
+            },
+            {
+              "name": "Marbre",
+              "keywords": [
+                "marbre",
+                "carreleur"
+              ]
+            },
+            {
+              "name": "Granit",
+              "keywords": [
+                "granit",
+                "carreleur"
+              ]
+            },
+            {
+              "name": "Chape",
+              "keywords": [
+                "chape",
+                "carreleur"
+              ]
+            },
+            {
+              "name": "Réparation carrelage",
+              "keywords": [
+                "reparation carrelage",
+                "reparation",
+                "carrelage",
+                "carreleur"
+              ]
+            },
+            {
+              "name": "Ponçage parquet",
+              "keywords": [
+                "poncage parquet",
+                "poncage",
+                "parquet",
+                "carreleur"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Menuiserie",
+          "services": [
+            {
+              "name": "Menuisier bois",
+              "keywords": [
+                "menuisier bois",
+                "menuisier",
+                "bois"
+              ]
+            },
+            {
+              "name": "Menuisier aluminium",
+              "keywords": [
+                "menuisier aluminium",
+                "menuisier",
+                "aluminium"
+              ]
+            },
+            {
+              "name": "Menuisier PVC",
+              "keywords": [
+                "menuisier pvc",
+                "menuisier"
+              ]
+            },
+            {
+              "name": "Fabrication meuble",
+              "keywords": [
+                "fabrication meuble",
+                "fabrication",
+                "meuble",
+                "menuisier"
+              ]
+            },
+            {
+              "name": "Porte",
+              "keywords": [
+                "porte",
+                "menuisier"
+              ]
+            },
+            {
+              "name": "Fenêtre",
+              "keywords": [
+                "fenetre",
+                "menuisier"
+              ]
+            },
+            {
+              "name": "Placard",
+              "keywords": [
+                "placard",
+                "menuisier"
+              ]
+            },
+            {
+              "name": "Dressing",
+              "keywords": [
+                "dressing",
+                "menuisier"
+              ]
+            },
+            {
+              "name": "Cuisine équipée",
+              "keywords": [
+                "cuisine equipee",
+                "cuisine",
+                "equipee",
+                "menuisier"
+              ]
+            },
+            {
+              "name": "Lit",
+              "keywords": [
+                "lit",
+                "menuisier"
+              ]
+            },
+            {
+              "name": "Table",
+              "keywords": [
+                "table",
+                "menuisier"
+              ]
+            },
+            {
+              "name": "Bureau",
+              "keywords": [
+                "bureau",
+                "menuisier"
+              ]
+            },
+            {
+              "name": "Meuble TV",
+              "keywords": [
+                "meuble tv",
+                "meuble",
+                "menuisier"
+              ]
+            },
+            {
+              "name": "Réparation meuble",
+              "keywords": [
+                "reparation meuble",
+                "reparation",
+                "meuble",
+                "menuisier"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Serrurerie & métallerie",
+          "services": [
+            {
+              "name": "Serrurier",
+              "keywords": [
+                "serrurier"
+              ]
+            },
+            {
+              "name": "Ouverture de porte",
+              "keywords": [
+                "ouverture de porte",
+                "ouverture",
+                "porte",
+                "serrurier"
+              ]
+            },
+            {
+              "name": "Changement serrure",
+              "keywords": [
+                "changement serrure",
+                "changement",
+                "serrure",
+                "serrurier"
+              ]
+            },
+            {
+              "name": "Double de clé",
+              "keywords": [
+                "double de cle",
+                "double",
+                "serrurier"
+              ]
+            },
+            {
+              "name": "Porte métallique",
+              "keywords": [
+                "porte metallique",
+                "porte",
+                "metallique",
+                "serrurier"
+              ]
+            },
+            {
+              "name": "Grille métallique",
+              "keywords": [
+                "grille metallique",
+                "grille",
+                "metallique",
+                "serrurier"
+              ]
+            },
+            {
+              "name": "Portail",
+              "keywords": [
+                "portail",
+                "serrurier"
+              ]
+            },
+            {
+              "name": "Garde-corps",
+              "keywords": [
+                "garde corps",
+                "garde",
+                "corps",
+                "serrurier"
+              ]
+            },
+            {
+              "name": "Soudeur",
+              "keywords": [
+                "soudeur",
+                "serrurier"
+              ]
+            },
+            {
+              "name": "Ferronnier",
+              "keywords": [
+                "ferronnier",
+                "serrurier"
+              ]
+            },
+            {
+              "name": "Structure métallique",
+              "keywords": [
+                "structure metallique",
+                "structure",
+                "metallique",
+                "serrurier"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Toiture & étanchéité",
+          "services": [
+            {
+              "name": "Couvreur",
+              "keywords": [
+                "couvreur"
+              ]
+            },
+            {
+              "name": "Réparation toiture",
+              "keywords": [
+                "reparation toiture",
+                "reparation",
+                "toiture",
+                "couvreur"
+              ]
+            },
+            {
+              "name": "Pose toiture",
+              "keywords": [
+                "pose toiture",
+                "pose",
+                "toiture",
+                "couvreur"
+              ]
+            },
+            {
+              "name": "Tôle",
+              "keywords": [
+                "tole",
+                "couvreur"
+              ]
+            },
+            {
+              "name": "Charpente",
+              "keywords": [
+                "charpente",
+                "couvreur"
+              ]
+            },
+            {
+              "name": "Gouttière",
+              "keywords": [
+                "gouttiere",
+                "couvreur"
+              ]
+            },
+            {
+              "name": "Étanchéité toiture",
+              "keywords": [
+                "etancheite toiture",
+                "etancheite",
+                "toiture",
+                "couvreur"
+              ]
+            },
+            {
+              "name": "Infiltration d'eau",
+              "keywords": [
+                "infiltration d eau",
+                "infiltration",
+                "couvreur"
+              ]
+            },
+            {
+              "name": "Isolation toiture",
+              "keywords": [
+                "isolation toiture",
+                "isolation",
+                "toiture",
+                "couvreur"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Énergie solaire & groupes électrogènes",
+          "services": [
+            {
+              "name": "Installation solaire",
+              "keywords": [
+                "installation solaire",
+                "installation",
+                "solaire"
+              ]
+            },
+            {
+              "name": "Panneaux solaires",
+              "keywords": [
+                "panneaux solaires",
+                "panneaux",
+                "solaires",
+                "solaire"
+              ]
+            },
+            {
+              "name": "Batterie solaire",
+              "keywords": [
+                "batterie solaire",
+                "batterie",
+                "solaire"
+              ]
+            },
+            {
+              "name": "Onduleur",
+              "keywords": [
+                "onduleur",
+                "solaire"
+              ]
+            },
+            {
+              "name": "Maintenance solaire",
+              "keywords": [
+                "maintenance solaire",
+                "maintenance",
+                "solaire"
+              ]
+            },
+            {
+              "name": "Groupe électrogène",
+              "keywords": [
+                "groupe electrogene",
+                "groupe",
+                "electrogene",
+                "solaire"
+              ]
+            },
+            {
+              "name": "Réparation groupe électrogène",
+              "keywords": [
+                "reparation groupe electrogene",
+                "reparation",
+                "groupe",
+                "electrogene",
+                "solaire"
+              ]
+            },
+            {
+              "name": "Entretien groupe électrogène",
+              "keywords": [
+                "entretien groupe electrogene",
+                "entretien",
+                "groupe",
+                "electrogene",
+                "solaire"
+              ]
+            },
+            {
+              "name": "Inverseur automatique",
+              "keywords": [
+                "inverseur automatique",
+                "inverseur",
+                "automatique",
+                "solaire"
+              ]
+            },
+            {
+              "name": "Audit énergétique",
+              "keywords": [
+                "audit energetique",
+                "audit",
+                "energetique",
+                "solaire"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Piscine",
+          "services": [
+            {
+              "name": "Construction piscine",
+              "keywords": [
+                "construction piscine",
+                "construction",
+                "piscine"
+              ]
+            },
+            {
+              "name": "Nettoyage piscine",
+              "keywords": [
+                "nettoyage piscine",
+                "nettoyage",
+                "piscine"
+              ]
+            },
+            {
+              "name": "Entretien piscine",
+              "keywords": [
+                "entretien piscine",
+                "entretien",
+                "piscine"
+              ]
+            },
+            {
+              "name": "Réparation piscine",
+              "keywords": [
+                "reparation piscine",
+                "reparation",
+                "piscine"
+              ]
+            },
+            {
+              "name": "Pompe piscine",
+              "keywords": [
+                "pompe piscine",
+                "pompe",
+                "piscine"
+              ]
+            },
+            {
+              "name": "Traitement eau",
+              "keywords": [
+                "traitement eau",
+                "traitement",
+                "piscine"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Eau & forage",
+          "services": [
+            {
+              "name": "Forage",
+              "keywords": [
+                "forage"
+              ]
+            },
+            {
+              "name": "Installation pompe",
+              "keywords": [
+                "installation pompe",
+                "installation",
+                "pompe",
+                "forage"
+              ]
+            },
+            {
+              "name": "Pompe immergée",
+              "keywords": [
+                "pompe immergee",
+                "pompe",
+                "immergee",
+                "forage"
+              ]
+            },
+            {
+              "name": "Puits",
+              "keywords": [
+                "puits",
+                "forage"
+              ]
+            },
+            {
+              "name": "Château d'eau",
+              "keywords": [
+                "chateau d eau",
+                "chateau",
+                "forage"
+              ]
+            },
+            {
+              "name": "Réservoir",
+              "keywords": [
+                "reservoir",
+                "forage"
+              ]
+            },
+            {
+              "name": "Traitement eau",
+              "keywords": [
+                "traitement eau",
+                "traitement",
+                "forage"
+              ]
+            },
+            {
+              "name": "Filtration",
+              "keywords": [
+                "filtration",
+                "forage"
+              ]
+            },
+            {
+              "name": "Analyse eau",
+              "keywords": [
+                "analyse eau",
+                "analyse",
+                "forage"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Maison & Entretien",
+      "subcategories": [
+        {
+          "subcategory": "Ménage & entretien",
+          "services": [
+            {
+              "name": "Ménage domicile",
+              "keywords": [
+                "menage domicile",
+                "menage",
+                "domicile"
+              ]
+            },
+            {
+              "name": "Femme de ménage",
+              "keywords": [
+                "femme de menage",
+                "femme",
+                "menage"
+              ]
+            },
+            {
+              "name": "Nettoyage appartement",
+              "keywords": [
+                "nettoyage appartement",
+                "nettoyage",
+                "appartement",
+                "menage"
+              ]
+            },
+            {
+              "name": "Nettoyage maison",
+              "keywords": [
+                "nettoyage maison",
+                "nettoyage",
+                "maison",
+                "menage"
+              ]
+            },
+            {
+              "name": "Nettoyage bureau",
+              "keywords": [
+                "nettoyage bureau",
+                "nettoyage",
+                "bureau",
+                "menage"
+              ]
+            },
+            {
+              "name": "Nettoyage commerce",
+              "keywords": [
+                "nettoyage commerce",
+                "nettoyage",
+                "commerce",
+                "menage"
+              ]
+            },
+            {
+              "name": "Grand nettoyage",
+              "keywords": [
+                "grand nettoyage",
+                "grand",
+                "nettoyage",
+                "menage"
+              ]
+            },
+            {
+              "name": "Nettoyage après travaux",
+              "keywords": [
+                "nettoyage apres travaux",
+                "nettoyage",
+                "apres",
+                "travaux",
+                "menage"
+              ]
+            },
+            {
+              "name": "Nettoyage déménagement",
+              "keywords": [
+                "nettoyage demenagement",
+                "nettoyage",
+                "demenagement",
+                "menage"
+              ]
+            },
+            {
+              "name": "Lavage vitres",
+              "keywords": [
+                "lavage vitres",
+                "lavage",
+                "vitres",
+                "menage"
+              ]
+            },
+            {
+              "name": "Repassage",
+              "keywords": [
+                "repassage",
+                "menage"
+              ]
+            },
+            {
+              "name": "Lessive",
+              "keywords": [
+                "lessive",
+                "menage"
+              ]
+            },
+            {
+              "name": "Nettoyage canapé",
+              "keywords": [
+                "nettoyage canape",
+                "nettoyage",
+                "canape",
+                "menage"
+              ]
+            },
+            {
+              "name": "Nettoyage tapis",
+              "keywords": [
+                "nettoyage tapis",
+                "nettoyage",
+                "tapis",
+                "menage"
+              ]
+            },
+            {
+              "name": "Nettoyage matelas",
+              "keywords": [
+                "nettoyage matelas",
+                "nettoyage",
+                "matelas",
+                "menage"
+              ]
+            },
+            {
+              "name": "Désinfection",
+              "keywords": [
+                "desinfection",
+                "menage"
+              ]
+            },
+            {
+              "name": "Nettoyage industriel",
+              "keywords": [
+                "nettoyage industriel",
+                "nettoyage",
+                "industriel",
+                "menage"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Lutte contre nuisibles",
+          "services": [
+            {
+              "name": "Désinsectisation",
+              "keywords": [
+                "desinsectisation",
+                "nuisibles"
+              ]
+            },
+            {
+              "name": "Dératisation",
+              "keywords": [
+                "deratisation",
+                "nuisibles"
+              ]
+            },
+            {
+              "name": "Cafards",
+              "keywords": [
+                "cafards",
+                "nuisibles"
+              ]
+            },
+            {
+              "name": "Fourmis",
+              "keywords": [
+                "fourmis",
+                "nuisibles"
+              ]
+            },
+            {
+              "name": "Moustiques",
+              "keywords": [
+                "moustiques",
+                "nuisibles"
+              ]
+            },
+            {
+              "name": "Termites",
+              "keywords": [
+                "termites",
+                "nuisibles"
+              ]
+            },
+            {
+              "name": "Punaises de lit",
+              "keywords": [
+                "punaises de lit",
+                "punaises",
+                "nuisibles"
+              ]
+            },
+            {
+              "name": "Désinfection",
+              "keywords": [
+                "desinfection",
+                "nuisibles"
+              ]
+            },
+            {
+              "name": "Traitement anti-nuisibles",
+              "keywords": [
+                "traitement anti nuisibles",
+                "traitement",
+                "anti",
+                "nuisibles"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Jardinage & espaces verts",
+          "services": [
+            {
+              "name": "Jardinier",
+              "keywords": [
+                "jardinier"
+              ]
+            },
+            {
+              "name": "Entretien jardin",
+              "keywords": [
+                "entretien jardin",
+                "entretien",
+                "jardin",
+                "jardinier"
+              ]
+            },
+            {
+              "name": "Tonte pelouse",
+              "keywords": [
+                "tonte pelouse",
+                "tonte",
+                "pelouse",
+                "jardinier"
+              ]
+            },
+            {
+              "name": "Débroussaillage",
+              "keywords": [
+                "debroussaillage",
+                "jardinier"
+              ]
+            },
+            {
+              "name": "Taille haie",
+              "keywords": [
+                "taille haie",
+                "taille",
+                "haie",
+                "jardinier"
+              ]
+            },
+            {
+              "name": "Élagage",
+              "keywords": [
+                "elagage",
+                "jardinier"
+              ]
+            },
+            {
+              "name": "Abattage arbre",
+              "keywords": [
+                "abattage arbre",
+                "abattage",
+                "arbre",
+                "jardinier"
+              ]
+            },
+            {
+              "name": "Plantation",
+              "keywords": [
+                "plantation",
+                "jardinier"
+              ]
+            },
+            {
+              "name": "Aménagement jardin",
+              "keywords": [
+                "amenagement jardin",
+                "amenagement",
+                "jardin",
+                "jardinier"
+              ]
+            },
+            {
+              "name": "Paysagiste",
+              "keywords": [
+                "paysagiste",
+                "jardinier"
+              ]
+            },
+            {
+              "name": "Arrosage automatique",
+              "keywords": [
+                "arrosage automatique",
+                "arrosage",
+                "automatique",
+                "jardinier"
+              ]
+            },
+            {
+              "name": "Nettoyage terrain",
+              "keywords": [
+                "nettoyage terrain",
+                "nettoyage",
+                "terrain",
+                "jardinier"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Transport & Logistique",
+      "subcategories": [
+        {
+          "subcategory": "Déménagement & manutention",
+          "services": [
+            {
+              "name": "Déménagement maison",
+              "keywords": [
+                "demenagement maison",
+                "demenagement",
+                "maison"
+              ]
+            },
+            {
+              "name": "Déménagement appartement",
+              "keywords": [
+                "demenagement appartement",
+                "demenagement",
+                "appartement"
+              ]
+            },
+            {
+              "name": "Déménagement bureau",
+              "keywords": [
+                "demenagement bureau",
+                "demenagement",
+                "bureau"
+              ]
+            },
+            {
+              "name": "Manutention",
+              "keywords": [
+                "manutention",
+                "demenagement"
+              ]
+            },
+            {
+              "name": "Chargement",
+              "keywords": [
+                "chargement",
+                "demenagement"
+              ]
+            },
+            {
+              "name": "Déchargement",
+              "keywords": [
+                "dechargement",
+                "demenagement"
+              ]
+            },
+            {
+              "name": "Monte-meuble",
+              "keywords": [
+                "monte meuble",
+                "monte",
+                "meuble",
+                "demenagement"
+              ]
+            },
+            {
+              "name": "Emballage",
+              "keywords": [
+                "emballage",
+                "demenagement"
+              ]
+            },
+            {
+              "name": "Garde-meuble",
+              "keywords": [
+                "garde meuble",
+                "garde",
+                "meuble",
+                "demenagement"
+              ]
+            },
+            {
+              "name": "Transport mobilier",
+              "keywords": [
+                "transport mobilier",
+                "transport",
+                "mobilier",
+                "demenagement"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Transport & livraison",
+          "services": [
+            {
+              "name": "Livraison colis",
+              "keywords": [
+                "livraison colis",
+                "livraison",
+                "colis",
+                "transport"
+              ]
+            },
+            {
+              "name": "Livraison express",
+              "keywords": [
+                "livraison express",
+                "livraison",
+                "express",
+                "transport"
+              ]
+            },
+            {
+              "name": "Coursier",
+              "keywords": [
+                "coursier",
+                "transport"
+              ]
+            },
+            {
+              "name": "Moto livraison",
+              "keywords": [
+                "moto livraison",
+                "moto",
+                "livraison",
+                "transport"
+              ]
+            },
+            {
+              "name": "Livraison repas",
+              "keywords": [
+                "livraison repas",
+                "livraison",
+                "repas",
+                "transport"
+              ]
+            },
+            {
+              "name": "Transport marchandises",
+              "keywords": [
+                "transport marchandises",
+                "transport",
+                "marchandises"
+              ]
+            },
+            {
+              "name": "Camionnette",
+              "keywords": [
+                "camionnette",
+                "transport"
+              ]
+            },
+            {
+              "name": "Camion",
+              "keywords": [
+                "camion",
+                "transport"
+              ]
+            },
+            {
+              "name": "Pick-up",
+              "keywords": [
+                "pick up",
+                "pick",
+                "transport"
+              ]
+            },
+            {
+              "name": "Transport meubles",
+              "keywords": [
+                "transport meubles",
+                "transport",
+                "meubles"
+              ]
+            },
+            {
+              "name": "Transport matériaux",
+              "keywords": [
+                "transport materiaux",
+                "transport",
+                "materiaux"
+              ]
+            },
+            {
+              "name": "Chauffeur privé",
+              "keywords": [
+                "chauffeur prive",
+                "chauffeur",
+                "prive",
+                "transport"
+              ]
+            },
+            {
+              "name": "Chauffeur avec véhicule",
+              "keywords": [
+                "chauffeur avec vehicule",
+                "chauffeur",
+                "vehicule",
+                "transport"
+              ]
+            },
+            {
+              "name": "Chauffeur sans véhicule",
+              "keywords": [
+                "chauffeur sans vehicule",
+                "chauffeur",
+                "vehicule",
+                "transport"
+              ]
+            },
+            {
+              "name": "Location voiture avec chauffeur",
+              "keywords": [
+                "location voiture avec chauffeur",
+                "location",
+                "voiture",
+                "chauffeur",
+                "transport"
+              ]
+            },
+            {
+              "name": "Transfert aéroport",
+              "keywords": [
+                "transfert aeroport",
+                "transfert",
+                "aeroport",
+                "transport"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Automobile & Moto",
+      "subcategories": [
+        {
+          "subcategory": "Automobile",
+          "services": [
+            {
+              "name": "Mécanicien",
+              "keywords": [
+                "mecanicien"
+              ]
+            },
+            {
+              "name": "Vidange",
+              "keywords": [
+                "vidange",
+                "mecanicien"
+              ]
+            },
+            {
+              "name": "Freinage",
+              "keywords": [
+                "freinage",
+                "mecanicien"
+              ]
+            },
+            {
+              "name": "Embrayage",
+              "keywords": [
+                "embrayage",
+                "mecanicien"
+              ]
+            },
+            {
+              "name": "Moteur",
+              "keywords": [
+                "moteur",
+                "mecanicien"
+              ]
+            },
+            {
+              "name": "Batterie",
+              "keywords": [
+                "batterie",
+                "mecanicien"
+              ]
+            },
+            {
+              "name": "Diagnostic automobile",
+              "keywords": [
+                "diagnostic automobile",
+                "diagnostic",
+                "automobile",
+                "mecanicien"
+              ]
+            },
+            {
+              "name": "Électricité automobile",
+              "keywords": [
+                "electricite automobile",
+                "electricite",
+                "automobile",
+                "mecanicien"
+              ]
+            },
+            {
+              "name": "Climatisation auto",
+              "keywords": [
+                "climatisation auto",
+                "climatisation",
+                "auto",
+                "mecanicien"
+              ]
+            },
+            {
+              "name": "Carrosserie",
+              "keywords": [
+                "carrosserie",
+                "mecanicien"
+              ]
+            },
+            {
+              "name": "Peinture automobile",
+              "keywords": [
+                "peinture automobile",
+                "peinture",
+                "automobile",
+                "mecanicien"
+              ]
+            },
+            {
+              "name": "Pare-brise",
+              "keywords": [
+                "pare brise",
+                "pare",
+                "brise",
+                "mecanicien"
+              ]
+            },
+            {
+              "name": "Pneus",
+              "keywords": [
+                "pneus",
+                "mecanicien"
+              ]
+            },
+            {
+              "name": "Géométrie",
+              "keywords": [
+                "geometrie",
+                "mecanicien"
+              ]
+            },
+            {
+              "name": "Lavage auto",
+              "keywords": [
+                "lavage auto",
+                "lavage",
+                "auto",
+                "mecanicien"
+              ]
+            },
+            {
+              "name": "Nettoyage intérieur",
+              "keywords": [
+                "nettoyage interieur",
+                "nettoyage",
+                "interieur",
+                "mecanicien"
+              ]
+            },
+            {
+              "name": "Detailing",
+              "keywords": [
+                "detailing",
+                "mecanicien"
+              ]
+            },
+            {
+              "name": "Remorquage",
+              "keywords": [
+                "remorquage",
+                "mecanicien"
+              ]
+            },
+            {
+              "name": "Dépannage batterie",
+              "keywords": [
+                "depannage batterie",
+                "depannage",
+                "batterie",
+                "mecanicien"
+              ]
+            },
+            {
+              "name": "Dépannage route",
+              "keywords": [
+                "depannage route",
+                "depannage",
+                "route",
+                "mecanicien"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Moto",
+          "services": [
+            {
+              "name": "Réparation moto",
+              "keywords": [
+                "reparation moto",
+                "reparation",
+                "moto"
+              ]
+            },
+            {
+              "name": "Entretien moto",
+              "keywords": [
+                "entretien moto",
+                "entretien",
+                "moto"
+              ]
+            },
+            {
+              "name": "Vidange moto",
+              "keywords": [
+                "vidange moto",
+                "vidange",
+                "moto"
+              ]
+            },
+            {
+              "name": "Pneus moto",
+              "keywords": [
+                "pneus moto",
+                "pneus",
+                "moto"
+              ]
+            },
+            {
+              "name": "Électricité moto",
+              "keywords": [
+                "electricite moto",
+                "electricite",
+                "moto"
+              ]
+            },
+            {
+              "name": "Livraison à moto",
+              "keywords": [
+                "livraison a moto",
+                "livraison",
+                "moto"
+              ]
+            },
+            {
+              "name": "Dépannage moto",
+              "keywords": [
+                "depannage moto",
+                "depannage",
+                "moto"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Électronique & Informatique",
+      "subcategories": [
+        {
+          "subcategory": "Électroménager",
+          "services": [
+            {
+              "name": "Réparation machine à laver",
+              "keywords": [
+                "reparation machine a laver",
+                "reparation",
+                "machine",
+                "laver",
+                "electromenager"
+              ]
+            },
+            {
+              "name": "Réparation sèche-linge",
+              "keywords": [
+                "reparation seche linge",
+                "reparation",
+                "seche",
+                "linge",
+                "electromenager"
+              ]
+            },
+            {
+              "name": "Réparation réfrigérateur",
+              "keywords": [
+                "reparation refrigerateur",
+                "reparation",
+                "refrigerateur",
+                "electromenager"
+              ]
+            },
+            {
+              "name": "Réparation congélateur",
+              "keywords": [
+                "reparation congelateur",
+                "reparation",
+                "congelateur",
+                "electromenager"
+              ]
+            },
+            {
+              "name": "Réparation four",
+              "keywords": [
+                "reparation four",
+                "reparation",
+                "four",
+                "electromenager"
+              ]
+            },
+            {
+              "name": "Réparation micro-ondes",
+              "keywords": [
+                "reparation micro ondes",
+                "reparation",
+                "micro",
+                "ondes",
+                "electromenager"
+              ]
+            },
+            {
+              "name": "Réparation cuisinière",
+              "keywords": [
+                "reparation cuisiniere",
+                "reparation",
+                "cuisiniere",
+                "electromenager"
+              ]
+            },
+            {
+              "name": "Réparation ventilateur",
+              "keywords": [
+                "reparation ventilateur",
+                "reparation",
+                "ventilateur",
+                "electromenager"
+              ]
+            },
+            {
+              "name": "Installation électroménager",
+              "keywords": [
+                "installation electromenager",
+                "installation",
+                "electromenager"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Informatique",
+          "services": [
+            {
+              "name": "Réparation ordinateur",
+              "keywords": [
+                "reparation ordinateur",
+                "reparation",
+                "ordinateur",
+                "informatique"
+              ]
+            },
+            {
+              "name": "Réparation PC portable",
+              "keywords": [
+                "reparation pc portable",
+                "reparation",
+                "portable",
+                "informatique"
+              ]
+            },
+            {
+              "name": "Installation Windows",
+              "keywords": [
+                "installation windows",
+                "installation",
+                "windows",
+                "informatique"
+              ]
+            },
+            {
+              "name": "Installation logiciels",
+              "keywords": [
+                "installation logiciels",
+                "installation",
+                "logiciels",
+                "informatique"
+              ]
+            },
+            {
+              "name": "Suppression virus",
+              "keywords": [
+                "suppression virus",
+                "suppression",
+                "virus",
+                "informatique"
+              ]
+            },
+            {
+              "name": "Récupération données",
+              "keywords": [
+                "recuperation donnees",
+                "recuperation",
+                "donnees",
+                "informatique"
+              ]
+            },
+            {
+              "name": "Montage PC",
+              "keywords": [
+                "montage pc",
+                "montage",
+                "informatique"
+              ]
+            },
+            {
+              "name": "Maintenance informatique",
+              "keywords": [
+                "maintenance informatique",
+                "maintenance",
+                "informatique"
+              ]
+            },
+            {
+              "name": "Assistance informatique",
+              "keywords": [
+                "assistance informatique",
+                "assistance",
+                "informatique"
+              ]
+            },
+            {
+              "name": "Réseau informatique",
+              "keywords": [
+                "reseau informatique",
+                "reseau",
+                "informatique"
+              ]
+            },
+            {
+              "name": "Wi-Fi",
+              "keywords": [
+                "wi fi",
+                "informatique"
+              ]
+            },
+            {
+              "name": "Serveur",
+              "keywords": [
+                "serveur",
+                "informatique"
+              ]
+            },
+            {
+              "name": "Sauvegarde",
+              "keywords": [
+                "sauvegarde",
+                "informatique"
+              ]
+            },
+            {
+              "name": "Cybersécurité",
+              "keywords": [
+                "cybersecurite",
+                "informatique"
+              ]
+            },
+            {
+              "name": "Support informatique entreprise",
+              "keywords": [
+                "support informatique entreprise",
+                "support",
+                "informatique",
+                "entreprise"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Téléphones & électronique",
+          "services": [
+            {
+              "name": "Réparation téléphone",
+              "keywords": [
+                "reparation telephone",
+                "reparation",
+                "telephone"
+              ]
+            },
+            {
+              "name": "Écran cassé",
+              "keywords": [
+                "ecran casse",
+                "ecran",
+                "casse",
+                "telephone"
+              ]
+            },
+            {
+              "name": "Batterie téléphone",
+              "keywords": [
+                "batterie telephone",
+                "batterie",
+                "telephone"
+              ]
+            },
+            {
+              "name": "Connecteur de charge",
+              "keywords": [
+                "connecteur de charge",
+                "connecteur",
+                "charge",
+                "telephone"
+              ]
+            },
+            {
+              "name": "Déblocage téléphone",
+              "keywords": [
+                "deblocage telephone",
+                "deblocage",
+                "telephone"
+              ]
+            },
+            {
+              "name": "Réparation tablette",
+              "keywords": [
+                "reparation tablette",
+                "reparation",
+                "tablette",
+                "telephone"
+              ]
+            },
+            {
+              "name": "Réparation console",
+              "keywords": [
+                "reparation console",
+                "reparation",
+                "console",
+                "telephone"
+              ]
+            },
+            {
+              "name": "Réparation télévision",
+              "keywords": [
+                "reparation television",
+                "reparation",
+                "television",
+                "telephone"
+              ]
+            },
+            {
+              "name": "Réparation enceinte",
+              "keywords": [
+                "reparation enceinte",
+                "reparation",
+                "enceinte",
+                "telephone"
+              ]
+            },
+            {
+              "name": "Réparation appareil électronique",
+              "keywords": [
+                "reparation appareil electronique",
+                "reparation",
+                "appareil",
+                "electronique",
+                "telephone"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Internet, réseau & télécom",
+          "services": [
+            {
+              "name": "Installation Wi-Fi",
+              "keywords": [
+                "installation wi fi",
+                "installation",
+                "reseau"
+              ]
+            },
+            {
+              "name": "Configuration routeur",
+              "keywords": [
+                "configuration routeur",
+                "configuration",
+                "routeur",
+                "reseau"
+              ]
+            },
+            {
+              "name": "Installation fibre",
+              "keywords": [
+                "installation fibre",
+                "installation",
+                "fibre",
+                "reseau"
+              ]
+            },
+            {
+              "name": "Câblage réseau",
+              "keywords": [
+                "cablage reseau",
+                "cablage",
+                "reseau"
+              ]
+            },
+            {
+              "name": "Répéteur Wi-Fi",
+              "keywords": [
+                "repeteur wi fi",
+                "repeteur",
+                "reseau"
+              ]
+            },
+            {
+              "name": "Antenne",
+              "keywords": [
+                "antenne",
+                "reseau"
+              ]
+            },
+            {
+              "name": "Parabole",
+              "keywords": [
+                "parabole",
+                "reseau"
+              ]
+            },
+            {
+              "name": "Installation TV",
+              "keywords": [
+                "installation tv",
+                "installation",
+                "reseau"
+              ]
+            },
+            {
+              "name": "Installation Starlink",
+              "keywords": [
+                "installation starlink",
+                "installation",
+                "starlink",
+                "reseau"
+              ]
+            },
+            {
+              "name": "Réseau entreprise",
+              "keywords": [
+                "reseau entreprise",
+                "reseau",
+                "entreprise"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Sécurité",
+      "subcategories": [
+        {
+          "subcategory": "Sécurité",
+          "services": [
+            {
+              "name": "Installation caméra",
+              "keywords": [
+                "installation camera",
+                "installation",
+                "camera",
+                "securite"
+              ]
+            },
+            {
+              "name": "Vidéosurveillance",
+              "keywords": [
+                "videosurveillance",
+                "securite"
+              ]
+            },
+            {
+              "name": "Alarme",
+              "keywords": [
+                "alarme",
+                "securite"
+              ]
+            },
+            {
+              "name": "Contrôle d'accès",
+              "keywords": [
+                "controle d acces",
+                "controle",
+                "acces",
+                "securite"
+              ]
+            },
+            {
+              "name": "Interphone",
+              "keywords": [
+                "interphone",
+                "securite"
+              ]
+            },
+            {
+              "name": "Vidéophone",
+              "keywords": [
+                "videophone",
+                "securite"
+              ]
+            },
+            {
+              "name": "Gardiennage",
+              "keywords": [
+                "gardiennage",
+                "securite"
+              ]
+            },
+            {
+              "name": "Agent de sécurité",
+              "keywords": [
+                "agent de securite",
+                "agent",
+                "securite"
+              ]
+            },
+            {
+              "name": "Sécurité événementielle",
+              "keywords": [
+                "securite evenementielle",
+                "securite",
+                "evenementielle"
+              ]
+            },
+            {
+              "name": "GPS véhicule",
+              "keywords": [
+                "gps vehicule",
+                "vehicule",
+                "securite"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Beauté, Mode & Bien-être",
+      "subcategories": [
+        {
+          "subcategory": "Coiffure",
+          "services": [
+            {
+              "name": "Coiffure femme",
+              "keywords": [
+                "coiffure femme",
+                "coiffure",
+                "femme",
+                "coiffeur"
+              ]
+            },
+            {
+              "name": "Coiffure homme",
+              "keywords": [
+                "coiffure homme",
+                "coiffure",
+                "homme",
+                "coiffeur"
+              ]
+            },
+            {
+              "name": "Coiffure enfant",
+              "keywords": [
+                "coiffure enfant",
+                "coiffure",
+                "enfant",
+                "coiffeur"
+              ]
+            },
+            {
+              "name": "Tresses",
+              "keywords": [
+                "tresses",
+                "coiffeur"
+              ]
+            },
+            {
+              "name": "Nattes",
+              "keywords": [
+                "nattes",
+                "coiffeur"
+              ]
+            },
+            {
+              "name": "Braids",
+              "keywords": [
+                "braids",
+                "coiffeur"
+              ]
+            },
+            {
+              "name": "Vanilles",
+              "keywords": [
+                "vanilles",
+                "coiffeur"
+              ]
+            },
+            {
+              "name": "Locks",
+              "keywords": [
+                "locks",
+                "coiffeur"
+              ]
+            },
+            {
+              "name": "Dreadlocks",
+              "keywords": [
+                "dreadlocks",
+                "coiffeur"
+              ]
+            },
+            {
+              "name": "Perruque",
+              "keywords": [
+                "perruque",
+                "coiffeur"
+              ]
+            },
+            {
+              "name": "Tissage",
+              "keywords": [
+                "tissage",
+                "coiffeur"
+              ]
+            },
+            {
+              "name": "Pose lace",
+              "keywords": [
+                "pose lace",
+                "pose",
+                "lace",
+                "coiffeur"
+              ]
+            },
+            {
+              "name": "Défrisage",
+              "keywords": [
+                "defrisage",
+                "coiffeur"
+              ]
+            },
+            {
+              "name": "Coloration",
+              "keywords": [
+                "coloration",
+                "coiffeur"
+              ]
+            },
+            {
+              "name": "Barber",
+              "keywords": [
+                "barber",
+                "coiffeur"
+              ]
+            },
+            {
+              "name": "Coupe homme",
+              "keywords": [
+                "coupe homme",
+                "coupe",
+                "homme",
+                "coiffeur"
+              ]
+            },
+            {
+              "name": "Barbe",
+              "keywords": [
+                "barbe",
+                "coiffeur"
+              ]
+            },
+            {
+              "name": "Coiffeur à domicile",
+              "keywords": [
+                "coiffeur a domicile",
+                "coiffeur",
+                "domicile"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Beauté & esthétique",
+          "services": [
+            {
+              "name": "Maquillage",
+              "keywords": [
+                "maquillage",
+                "beaute"
+              ]
+            },
+            {
+              "name": "Maquillage mariage",
+              "keywords": [
+                "maquillage mariage",
+                "maquillage",
+                "mariage",
+                "beaute"
+              ]
+            },
+            {
+              "name": "Manucure",
+              "keywords": [
+                "manucure",
+                "beaute"
+              ]
+            },
+            {
+              "name": "Pédicure",
+              "keywords": [
+                "pedicure",
+                "beaute"
+              ]
+            },
+            {
+              "name": "Pose ongles",
+              "keywords": [
+                "pose ongles",
+                "pose",
+                "ongles",
+                "beaute"
+              ]
+            },
+            {
+              "name": "Gel",
+              "keywords": [
+                "gel",
+                "beaute"
+              ]
+            },
+            {
+              "name": "Vernis",
+              "keywords": [
+                "vernis",
+                "beaute"
+              ]
+            },
+            {
+              "name": "Extension cils",
+              "keywords": [
+                "extension cils",
+                "extension",
+                "cils",
+                "beaute"
+              ]
+            },
+            {
+              "name": "Sourcils",
+              "keywords": [
+                "sourcils",
+                "beaute"
+              ]
+            },
+            {
+              "name": "Épilation",
+              "keywords": [
+                "epilation",
+                "beaute"
+              ]
+            },
+            {
+              "name": "Soins visage",
+              "keywords": [
+                "soins visage",
+                "soins",
+                "visage",
+                "beaute"
+              ]
+            },
+            {
+              "name": "Beauté à domicile",
+              "keywords": [
+                "beaute a domicile",
+                "beaute",
+                "domicile"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Bien-être",
+          "services": [
+            {
+              "name": "Massage",
+              "keywords": [
+                "massage",
+                "bien etre"
+              ]
+            },
+            {
+              "name": "Massage sportif",
+              "keywords": [
+                "massage sportif",
+                "massage",
+                "sportif",
+                "bien etre"
+              ]
+            },
+            {
+              "name": "Massage relaxant",
+              "keywords": [
+                "massage relaxant",
+                "massage",
+                "relaxant",
+                "bien etre"
+              ]
+            },
+            {
+              "name": "Spa à domicile",
+              "keywords": [
+                "spa a domicile",
+                "domicile",
+                "bien etre"
+              ]
+            },
+            {
+              "name": "Coach bien-être",
+              "keywords": [
+                "coach bien etre",
+                "coach",
+                "bien",
+                "etre",
+                "bien etre"
+              ]
+            },
+            {
+              "name": "Yoga",
+              "keywords": [
+                "yoga",
+                "bien etre"
+              ]
+            },
+            {
+              "name": "Méditation",
+              "keywords": [
+                "meditation",
+                "bien etre"
+              ]
+            },
+            {
+              "name": "Coaching sportif",
+              "keywords": [
+                "coaching sportif",
+                "coaching",
+                "sportif",
+                "bien etre"
+              ]
+            },
+            {
+              "name": "Fitness",
+              "keywords": [
+                "fitness",
+                "bien etre"
+              ]
+            },
+            {
+              "name": "Personal trainer",
+              "keywords": [
+                "personal trainer",
+                "personal",
+                "trainer",
+                "bien etre"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Mode & couture",
+          "services": [
+            {
+              "name": "Couturier",
+              "keywords": [
+                "couturier"
+              ]
+            },
+            {
+              "name": "Couturière",
+              "keywords": [
+                "couturiere",
+                "couturier"
+              ]
+            },
+            {
+              "name": "Retouche vêtements",
+              "keywords": [
+                "retouche vetements",
+                "retouche",
+                "vetements",
+                "couturier"
+              ]
+            },
+            {
+              "name": "Confection robe",
+              "keywords": [
+                "confection robe",
+                "confection",
+                "robe",
+                "couturier"
+              ]
+            },
+            {
+              "name": "Costume",
+              "keywords": [
+                "costume",
+                "couturier"
+              ]
+            },
+            {
+              "name": "Tenue traditionnelle",
+              "keywords": [
+                "tenue traditionnelle",
+                "tenue",
+                "traditionnelle",
+                "couturier"
+              ]
+            },
+            {
+              "name": "Uniforme",
+              "keywords": [
+                "uniforme",
+                "couturier"
+              ]
+            },
+            {
+              "name": "Broderie",
+              "keywords": [
+                "broderie",
+                "couturier"
+              ]
+            },
+            {
+              "name": "Styliste",
+              "keywords": [
+                "styliste",
+                "couturier"
+              ]
+            },
+            {
+              "name": "Modéliste",
+              "keywords": [
+                "modeliste",
+                "couturier"
+              ]
+            },
+            {
+              "name": "Créateur de mode",
+              "keywords": [
+                "createur de mode",
+                "createur",
+                "mode",
+                "couturier"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Événementiel & Prestations",
+      "subcategories": [
+        {
+          "subcategory": "Photographie & vidéo",
+          "services": [
+            {
+              "name": "Photographe",
+              "keywords": [
+                "photographe"
+              ]
+            },
+            {
+              "name": "Photographe mariage",
+              "keywords": [
+                "photographe mariage",
+                "photographe",
+                "mariage"
+              ]
+            },
+            {
+              "name": "Photographe anniversaire",
+              "keywords": [
+                "photographe anniversaire",
+                "photographe",
+                "anniversaire"
+              ]
+            },
+            {
+              "name": "Portrait",
+              "keywords": [
+                "portrait",
+                "photographe"
+              ]
+            },
+            {
+              "name": "Photo identité",
+              "keywords": [
+                "photo identite",
+                "photo",
+                "identite",
+                "photographe"
+              ]
+            },
+            {
+              "name": "Vidéaste",
+              "keywords": [
+                "videaste",
+                "photographe"
+              ]
+            },
+            {
+              "name": "Drone",
+              "keywords": [
+                "drone",
+                "photographe"
+              ]
+            },
+            {
+              "name": "Montage vidéo",
+              "keywords": [
+                "montage video",
+                "montage",
+                "video",
+                "photographe"
+              ]
+            },
+            {
+              "name": "Retouche photo",
+              "keywords": [
+                "retouche photo",
+                "retouche",
+                "photo",
+                "photographe"
+              ]
+            },
+            {
+              "name": "Clip vidéo",
+              "keywords": [
+                "clip video",
+                "clip",
+                "video",
+                "photographe"
+              ]
+            },
+            {
+              "name": "Streaming événement",
+              "keywords": [
+                "streaming evenement",
+                "streaming",
+                "evenement",
+                "photographe"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Événementiel",
+          "services": [
+            {
+              "name": "Organisation mariage",
+              "keywords": [
+                "organisation mariage",
+                "organisation",
+                "mariage",
+                "evenementiel"
+              ]
+            },
+            {
+              "name": "Organisation anniversaire",
+              "keywords": [
+                "organisation anniversaire",
+                "organisation",
+                "anniversaire",
+                "evenementiel"
+              ]
+            },
+            {
+              "name": "Baby shower",
+              "keywords": [
+                "baby shower",
+                "baby",
+                "shower",
+                "evenementiel"
+              ]
+            },
+            {
+              "name": "Baptême",
+              "keywords": [
+                "bapteme",
+                "evenementiel"
+              ]
+            },
+            {
+              "name": "Conférence",
+              "keywords": [
+                "conference",
+                "evenementiel"
+              ]
+            },
+            {
+              "name": "Séminaire",
+              "keywords": [
+                "seminaire",
+                "evenementiel"
+              ]
+            },
+            {
+              "name": "Décoration événementielle",
+              "keywords": [
+                "decoration evenementielle",
+                "decoration",
+                "evenementielle",
+                "evenementiel"
+              ]
+            },
+            {
+              "name": "Location chaises",
+              "keywords": [
+                "location chaises",
+                "location",
+                "chaises",
+                "evenementiel"
+              ]
+            },
+            {
+              "name": "Location tables",
+              "keywords": [
+                "location tables",
+                "location",
+                "tables",
+                "evenementiel"
+              ]
+            },
+            {
+              "name": "Location tentes",
+              "keywords": [
+                "location tentes",
+                "location",
+                "tentes",
+                "evenementiel"
+              ]
+            },
+            {
+              "name": "Location vaisselle",
+              "keywords": [
+                "location vaisselle",
+                "location",
+                "vaisselle",
+                "evenementiel"
+              ]
+            },
+            {
+              "name": "Location sonorisation",
+              "keywords": [
+                "location sonorisation",
+                "location",
+                "sonorisation",
+                "evenementiel"
+              ]
+            },
+            {
+              "name": "DJ",
+              "keywords": [
+                "dj",
+                "evenementiel"
+              ]
+            },
+            {
+              "name": "MC / maître de cérémonie",
+              "keywords": [
+                "mc / maitre de ceremonie",
+                "maitre",
+                "ceremonie",
+                "evenementiel"
+              ]
+            },
+            {
+              "name": "Animateur",
+              "keywords": [
+                "animateur",
+                "evenementiel"
+              ]
+            },
+            {
+              "name": "Groupe musical",
+              "keywords": [
+                "groupe musical",
+                "groupe",
+                "musical",
+                "evenementiel"
+              ]
+            },
+            {
+              "name": "Hôtesse événementielle",
+              "keywords": [
+                "hotesse evenementielle",
+                "hotesse",
+                "evenementielle",
+                "evenementiel"
+              ]
+            },
+            {
+              "name": "Sécurité événementielle",
+              "keywords": [
+                "securite evenementielle",
+                "securite",
+                "evenementielle",
+                "evenementiel"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Traiteur & restauration",
+          "services": [
+            {
+              "name": "Traiteur",
+              "keywords": [
+                "traiteur"
+              ]
+            },
+            {
+              "name": "Cuisine gabonaise",
+              "keywords": [
+                "cuisine gabonaise",
+                "cuisine",
+                "gabonaise",
+                "traiteur"
+              ]
+            },
+            {
+              "name": "Cuisine africaine",
+              "keywords": [
+                "cuisine africaine",
+                "cuisine",
+                "africaine",
+                "traiteur"
+              ]
+            },
+            {
+              "name": "Cuisine européenne",
+              "keywords": [
+                "cuisine europeenne",
+                "cuisine",
+                "europeenne",
+                "traiteur"
+              ]
+            },
+            {
+              "name": "Buffet",
+              "keywords": [
+                "buffet",
+                "traiteur"
+              ]
+            },
+            {
+              "name": "Cocktail",
+              "keywords": [
+                "cocktail",
+                "traiteur"
+              ]
+            },
+            {
+              "name": "Repas mariage",
+              "keywords": [
+                "repas mariage",
+                "repas",
+                "mariage",
+                "traiteur"
+              ]
+            },
+            {
+              "name": "Repas anniversaire",
+              "keywords": [
+                "repas anniversaire",
+                "repas",
+                "anniversaire",
+                "traiteur"
+              ]
+            },
+            {
+              "name": "Chef à domicile",
+              "keywords": [
+                "chef a domicile",
+                "chef",
+                "domicile",
+                "traiteur"
+              ]
+            },
+            {
+              "name": "Pâtissier",
+              "keywords": [
+                "patissier",
+                "traiteur"
+              ]
+            },
+            {
+              "name": "Gâteau anniversaire",
+              "keywords": [
+                "gateau anniversaire",
+                "gateau",
+                "anniversaire",
+                "traiteur"
+              ]
+            },
+            {
+              "name": "Gâteau mariage",
+              "keywords": [
+                "gateau mariage",
+                "gateau",
+                "mariage",
+                "traiteur"
+              ]
+            },
+            {
+              "name": "Boulanger",
+              "keywords": [
+                "boulanger",
+                "traiteur"
+              ]
+            },
+            {
+              "name": "Grillades",
+              "keywords": [
+                "grillades",
+                "traiteur"
+              ]
+            },
+            {
+              "name": "Livraison repas",
+              "keywords": [
+                "livraison repas",
+                "livraison",
+                "repas",
+                "traiteur"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Éducation, Famille & Aide à la Personne",
+      "subcategories": [
+        {
+          "subcategory": "Enseignement & cours",
+          "services": [
+            {
+              "name": "Soutien scolaire",
+              "keywords": [
+                "soutien scolaire",
+                "soutien",
+                "scolaire",
+                "professeur"
+              ]
+            },
+            {
+              "name": "Mathématiques",
+              "keywords": [
+                "mathematiques",
+                "professeur"
+              ]
+            },
+            {
+              "name": "Français",
+              "keywords": [
+                "francais",
+                "professeur"
+              ]
+            },
+            {
+              "name": "Anglais",
+              "keywords": [
+                "anglais",
+                "professeur"
+              ]
+            },
+            {
+              "name": "Espagnol",
+              "keywords": [
+                "espagnol",
+                "professeur"
+              ]
+            },
+            {
+              "name": "Physique",
+              "keywords": [
+                "physique",
+                "professeur"
+              ]
+            },
+            {
+              "name": "Chimie",
+              "keywords": [
+                "chimie",
+                "professeur"
+              ]
+            },
+            {
+              "name": "Informatique",
+              "keywords": [
+                "informatique",
+                "professeur"
+              ]
+            },
+            {
+              "name": "Programmation",
+              "keywords": [
+                "programmation",
+                "professeur"
+              ]
+            },
+            {
+              "name": "Intelligence artificielle",
+              "keywords": [
+                "intelligence artificielle",
+                "intelligence",
+                "artificielle",
+                "professeur"
+              ]
+            },
+            {
+              "name": "Bureautique",
+              "keywords": [
+                "bureautique",
+                "professeur"
+              ]
+            },
+            {
+              "name": "Excel",
+              "keywords": [
+                "excel",
+                "professeur"
+              ]
+            },
+            {
+              "name": "Comptabilité",
+              "keywords": [
+                "comptabilite",
+                "professeur"
+              ]
+            },
+            {
+              "name": "Préparation examens",
+              "keywords": [
+                "preparation examens",
+                "preparation",
+                "examens",
+                "professeur"
+              ]
+            },
+            {
+              "name": "Cours à domicile",
+              "keywords": [
+                "cours a domicile",
+                "cours",
+                "domicile",
+                "professeur"
+              ]
+            },
+            {
+              "name": "Cours en ligne",
+              "keywords": [
+                "cours en ligne",
+                "cours",
+                "ligne",
+                "professeur"
+              ]
+            },
+            {
+              "name": "Alphabétisation",
+              "keywords": [
+                "alphabetisation",
+                "professeur"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Enfants & famille",
+          "services": [
+            {
+              "name": "Babysitting",
+              "keywords": [
+                "babysitting",
+                "garde enfant"
+              ]
+            },
+            {
+              "name": "Nounou",
+              "keywords": [
+                "nounou",
+                "garde enfant"
+              ]
+            },
+            {
+              "name": "Garde enfant",
+              "keywords": [
+                "garde enfant",
+                "garde",
+                "enfant"
+              ]
+            },
+            {
+              "name": "Sortie école",
+              "keywords": [
+                "sortie ecole",
+                "sortie",
+                "ecole",
+                "garde enfant"
+              ]
+            },
+            {
+              "name": "Aide aux devoirs",
+              "keywords": [
+                "aide aux devoirs",
+                "aide",
+                "devoirs",
+                "garde enfant"
+              ]
+            },
+            {
+              "name": "Animation enfant",
+              "keywords": [
+                "animation enfant",
+                "animation",
+                "enfant",
+                "garde enfant"
+              ]
+            },
+            {
+              "name": "Garde occasionnelle",
+              "keywords": [
+                "garde occasionnelle",
+                "garde",
+                "occasionnelle",
+                "garde enfant"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Aide à domicile",
+          "services": [
+            {
+              "name": "Aide personnes âgées",
+              "keywords": [
+                "aide personnes agees",
+                "aide",
+                "personnes",
+                "agees",
+                "aide domicile"
+              ]
+            },
+            {
+              "name": "Accompagnement quotidien",
+              "keywords": [
+                "accompagnement quotidien",
+                "accompagnement",
+                "quotidien",
+                "aide domicile"
+              ]
+            },
+            {
+              "name": "Courses",
+              "keywords": [
+                "courses",
+                "aide domicile"
+              ]
+            },
+            {
+              "name": "Préparation repas",
+              "keywords": [
+                "preparation repas",
+                "preparation",
+                "repas",
+                "aide domicile"
+              ]
+            },
+            {
+              "name": "Ménage",
+              "keywords": [
+                "menage",
+                "aide domicile"
+              ]
+            },
+            {
+              "name": "Assistance administrative",
+              "keywords": [
+                "assistance administrative",
+                "assistance",
+                "administrative",
+                "aide domicile"
+              ]
+            },
+            {
+              "name": "Dame de compagnie",
+              "keywords": [
+                "dame de compagnie",
+                "dame",
+                "compagnie",
+                "aide domicile"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Services Professionnels & Digital",
+      "subcategories": [
+        {
+          "subcategory": "Services professionnels",
+          "services": [
+            {
+              "name": "Comptable",
+              "keywords": [
+                "comptable",
+                "consultant"
+              ]
+            },
+            {
+              "name": "Gestionnaire",
+              "keywords": [
+                "gestionnaire",
+                "consultant"
+              ]
+            },
+            {
+              "name": "Consultant",
+              "keywords": [
+                "consultant"
+              ]
+            },
+            {
+              "name": "Business plan",
+              "keywords": [
+                "business plan",
+                "business",
+                "plan",
+                "consultant"
+              ]
+            },
+            {
+              "name": "Étude de marché",
+              "keywords": [
+                "etude de marche",
+                "etude",
+                "marche",
+                "consultant"
+              ]
+            },
+            {
+              "name": "Création entreprise",
+              "keywords": [
+                "creation entreprise",
+                "creation",
+                "entreprise",
+                "consultant"
+              ]
+            },
+            {
+              "name": "Secrétariat",
+              "keywords": [
+                "secretariat",
+                "consultant"
+              ]
+            },
+            {
+              "name": "Saisie de données",
+              "keywords": [
+                "saisie de donnees",
+                "saisie",
+                "donnees",
+                "consultant"
+              ]
+            },
+            {
+              "name": "Assistant virtuel",
+              "keywords": [
+                "assistant virtuel",
+                "assistant",
+                "virtuel",
+                "consultant"
+              ]
+            },
+            {
+              "name": "Ressources humaines",
+              "keywords": [
+                "ressources humaines",
+                "ressources",
+                "humaines",
+                "consultant"
+              ]
+            },
+            {
+              "name": "Recrutement",
+              "keywords": [
+                "recrutement",
+                "consultant"
+              ]
+            },
+            {
+              "name": "Formation professionnelle",
+              "keywords": [
+                "formation professionnelle",
+                "formation",
+                "professionnelle",
+                "consultant"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Juridique & administratif",
+          "description": "Pour les prestations juridiques réglementées, prévoir la vérification du professionnel et de ses qualifications avant publication.",
+          "services": [
+            {
+              "name": "Assistance administrative",
+              "keywords": [
+                "assistance administrative",
+                "assistance",
+                "administrative",
+                "juridique"
+              ]
+            },
+            {
+              "name": "Rédaction courrier",
+              "keywords": [
+                "redaction courrier",
+                "redaction",
+                "courrier",
+                "juridique"
+              ]
+            },
+            {
+              "name": "Constitution dossier",
+              "keywords": [
+                "constitution dossier",
+                "constitution",
+                "dossier",
+                "juridique"
+              ]
+            },
+            {
+              "name": "Création entreprise",
+              "keywords": [
+                "creation entreprise",
+                "creation",
+                "entreprise",
+                "juridique"
+              ]
+            },
+            {
+              "name": "Formalités administratives",
+              "keywords": [
+                "formalites administratives",
+                "formalites",
+                "administratives",
+                "juridique"
+              ]
+            },
+            {
+              "name": "Traduction documents",
+              "keywords": [
+                "traduction documents",
+                "traduction",
+                "documents",
+                "juridique"
+              ]
+            },
+            {
+              "name": "Écrivain public",
+              "keywords": [
+                "ecrivain public",
+                "ecrivain",
+                "public",
+                "juridique"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Marketing & communication",
+          "services": [
+            {
+              "name": "Community manager",
+              "keywords": [
+                "community manager",
+                "community",
+                "manager",
+                "marketing"
+              ]
+            },
+            {
+              "name": "Gestion réseaux sociaux",
+              "keywords": [
+                "gestion reseaux sociaux",
+                "gestion",
+                "reseaux",
+                "sociaux",
+                "marketing"
+              ]
+            },
+            {
+              "name": "Création contenu",
+              "keywords": [
+                "creation contenu",
+                "creation",
+                "contenu",
+                "marketing"
+              ]
+            },
+            {
+              "name": "Publicité Facebook",
+              "keywords": [
+                "publicite facebook",
+                "publicite",
+                "facebook",
+                "marketing"
+              ]
+            },
+            {
+              "name": "Publicité Instagram",
+              "keywords": [
+                "publicite instagram",
+                "publicite",
+                "instagram",
+                "marketing"
+              ]
+            },
+            {
+              "name": "TikTok",
+              "keywords": [
+                "tiktok",
+                "marketing"
+              ]
+            },
+            {
+              "name": "Google Ads",
+              "keywords": [
+                "google ads",
+                "google",
+                "marketing"
+              ]
+            },
+            {
+              "name": "Marketing digital",
+              "keywords": [
+                "marketing digital",
+                "marketing",
+                "digital"
+              ]
+            },
+            {
+              "name": "Branding",
+              "keywords": [
+                "branding",
+                "marketing"
+              ]
+            },
+            {
+              "name": "Logo",
+              "keywords": [
+                "logo",
+                "marketing"
+              ]
+            },
+            {
+              "name": "Flyer",
+              "keywords": [
+                "flyer",
+                "marketing"
+              ]
+            },
+            {
+              "name": "Affiche",
+              "keywords": [
+                "affiche",
+                "marketing"
+              ]
+            },
+            {
+              "name": "Carte de visite",
+              "keywords": [
+                "carte de visite",
+                "carte",
+                "visite",
+                "marketing"
+              ]
+            },
+            {
+              "name": "Communication entreprise",
+              "keywords": [
+                "communication entreprise",
+                "communication",
+                "entreprise",
+                "marketing"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Web & développement",
+          "services": [
+            {
+              "name": "Création site web",
+              "keywords": [
+                "creation site web",
+                "creation",
+                "site",
+                "developpeur"
+              ]
+            },
+            {
+              "name": "Site vitrine",
+              "keywords": [
+                "site vitrine",
+                "site",
+                "vitrine",
+                "developpeur"
+              ]
+            },
+            {
+              "name": "E-commerce",
+              "keywords": [
+                "e commerce",
+                "commerce",
+                "developpeur"
+              ]
+            },
+            {
+              "name": "Application mobile",
+              "keywords": [
+                "application mobile",
+                "application",
+                "mobile",
+                "developpeur"
+              ]
+            },
+            {
+              "name": "Application web",
+              "keywords": [
+                "application web",
+                "application",
+                "developpeur"
+              ]
+            },
+            {
+              "name": "Développeur frontend",
+              "keywords": [
+                "developpeur frontend",
+                "developpeur",
+                "frontend"
+              ]
+            },
+            {
+              "name": "Développeur backend",
+              "keywords": [
+                "developpeur backend",
+                "developpeur",
+                "backend"
+              ]
+            },
+            {
+              "name": "Full-stack",
+              "keywords": [
+                "full stack",
+                "full",
+                "stack",
+                "developpeur"
+              ]
+            },
+            {
+              "name": "WordPress",
+              "keywords": [
+                "wordpress",
+                "developpeur"
+              ]
+            },
+            {
+              "name": "Hébergement",
+              "keywords": [
+                "hebergement",
+                "developpeur"
+              ]
+            },
+            {
+              "name": "Nom de domaine",
+              "keywords": [
+                "nom de domaine",
+                "domaine",
+                "developpeur"
+              ]
+            },
+            {
+              "name": "Maintenance site",
+              "keywords": [
+                "maintenance site",
+                "maintenance",
+                "site",
+                "developpeur"
+              ]
+            },
+            {
+              "name": "SEO",
+              "keywords": [
+                "seo",
+                "developpeur"
+              ]
+            },
+            {
+              "name": "API",
+              "keywords": [
+                "api",
+                "developpeur"
+              ]
+            },
+            {
+              "name": "Automatisation",
+              "keywords": [
+                "automatisation",
+                "developpeur"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Intelligence artificielle",
+          "services": [
+            {
+              "name": "Chatbot",
+              "keywords": [
+                "chatbot",
+                "ia"
+              ]
+            },
+            {
+              "name": "Agent IA",
+              "keywords": [
+                "agent ia",
+                "agent",
+                "ia"
+              ]
+            },
+            {
+              "name": "Automatisation IA",
+              "keywords": [
+                "automatisation ia",
+                "automatisation",
+                "ia"
+              ]
+            },
+            {
+              "name": "RAG",
+              "keywords": [
+                "rag",
+                "ia"
+              ]
+            },
+            {
+              "name": "Analyse de données",
+              "keywords": [
+                "analyse de donnees",
+                "analyse",
+                "donnees",
+                "ia"
+              ]
+            },
+            {
+              "name": "Machine Learning",
+              "keywords": [
+                "machine learning",
+                "machine",
+                "learning",
+                "ia"
+              ]
+            },
+            {
+              "name": "Data Science",
+              "keywords": [
+                "data science",
+                "data",
+                "science",
+                "ia"
+              ]
+            },
+            {
+              "name": "Vision par ordinateur",
+              "keywords": [
+                "vision par ordinateur",
+                "vision",
+                "ordinateur",
+                "ia"
+              ]
+            },
+            {
+              "name": "Génération de contenu",
+              "keywords": [
+                "generation de contenu",
+                "generation",
+                "contenu",
+                "ia"
+              ]
+            },
+            {
+              "name": "Intégration ChatGPT",
+              "keywords": [
+                "integration chatgpt",
+                "integration",
+                "chatgpt",
+                "ia"
+              ]
+            },
+            {
+              "name": "Formation IA",
+              "keywords": [
+                "formation ia",
+                "formation",
+                "ia"
+              ]
+            },
+            {
+              "name": "Conseil IA",
+              "keywords": [
+                "conseil ia",
+                "conseil",
+                "ia"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Graphisme & création",
+          "services": [
+            {
+              "name": "Graphiste",
+              "keywords": [
+                "graphiste"
+              ]
+            },
+            {
+              "name": "Logo",
+              "keywords": [
+                "logo",
+                "graphiste"
+              ]
+            },
+            {
+              "name": "Flyer",
+              "keywords": [
+                "flyer",
+                "graphiste"
+              ]
+            },
+            {
+              "name": "Affiche",
+              "keywords": [
+                "affiche",
+                "graphiste"
+              ]
+            },
+            {
+              "name": "Brochure",
+              "keywords": [
+                "brochure",
+                "graphiste"
+              ]
+            },
+            {
+              "name": "Packaging",
+              "keywords": [
+                "packaging",
+                "graphiste"
+              ]
+            },
+            {
+              "name": "Carte de visite",
+              "keywords": [
+                "carte de visite",
+                "carte",
+                "visite",
+                "graphiste"
+              ]
+            },
+            {
+              "name": "Présentation PowerPoint",
+              "keywords": [
+                "presentation powerpoint",
+                "presentation",
+                "powerpoint",
+                "graphiste"
+              ]
+            },
+            {
+              "name": "CV",
+              "keywords": [
+                "cv",
+                "graphiste"
+              ]
+            },
+            {
+              "name": "Motion design",
+              "keywords": [
+                "motion design",
+                "motion",
+                "design",
+                "graphiste"
+              ]
+            },
+            {
+              "name": "Illustration",
+              "keywords": [
+                "illustration",
+                "graphiste"
+              ]
+            },
+            {
+              "name": "Infographie",
+              "keywords": [
+                "infographie",
+                "graphiste"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Rédaction & traduction",
+          "services": [
+            {
+              "name": "Rédaction",
+              "keywords": [
+                "redaction",
+                "redacteur"
+              ]
+            },
+            {
+              "name": "Correction",
+              "keywords": [
+                "correction",
+                "redacteur"
+              ]
+            },
+            {
+              "name": "Relecture",
+              "keywords": [
+                "relecture",
+                "redacteur"
+              ]
+            },
+            {
+              "name": "Traduction français-anglais",
+              "keywords": [
+                "traduction francais anglais",
+                "traduction",
+                "francais",
+                "anglais",
+                "redacteur"
+              ]
+            },
+            {
+              "name": "Traduction anglais-français",
+              "keywords": [
+                "traduction anglais francais",
+                "traduction",
+                "anglais",
+                "francais",
+                "redacteur"
+              ]
+            },
+            {
+              "name": "CV",
+              "keywords": [
+                "cv",
+                "redacteur"
+              ]
+            },
+            {
+              "name": "Lettre de motivation",
+              "keywords": [
+                "lettre de motivation",
+                "lettre",
+                "motivation",
+                "redacteur"
+              ]
+            },
+            {
+              "name": "Rapport",
+              "keywords": [
+                "rapport",
+                "redacteur"
+              ]
+            },
+            {
+              "name": "Mémoire",
+              "keywords": [
+                "memoire",
+                "redacteur"
+              ]
+            },
+            {
+              "name": "Transcription audio",
+              "keywords": [
+                "transcription audio",
+                "transcription",
+                "audio",
+                "redacteur"
+              ]
+            },
+            {
+              "name": "Sous-titrage",
+              "keywords": [
+                "sous titrage",
+                "sous",
+                "titrage",
+                "redacteur"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Immobilier & Études Techniques",
+      "subcategories": [
+        {
+          "subcategory": "Immobilier",
+          "services": [
+            {
+              "name": "Agent immobilier",
+              "keywords": [
+                "agent immobilier",
+                "agent",
+                "immobilier"
+              ]
+            },
+            {
+              "name": "Recherche logement",
+              "keywords": [
+                "recherche logement",
+                "recherche",
+                "logement",
+                "immobilier"
+              ]
+            },
+            {
+              "name": "Vente maison",
+              "keywords": [
+                "vente maison",
+                "vente",
+                "maison",
+                "immobilier"
+              ]
+            },
+            {
+              "name": "Vente terrain",
+              "keywords": [
+                "vente terrain",
+                "vente",
+                "terrain",
+                "immobilier"
+              ]
+            },
+            {
+              "name": "Location appartement",
+              "keywords": [
+                "location appartement",
+                "location",
+                "appartement",
+                "immobilier"
+              ]
+            },
+            {
+              "name": "Location maison",
+              "keywords": [
+                "location maison",
+                "location",
+                "maison",
+                "immobilier"
+              ]
+            },
+            {
+              "name": "Gestion locative",
+              "keywords": [
+                "gestion locative",
+                "gestion",
+                "locative",
+                "immobilier"
+              ]
+            },
+            {
+              "name": "État des lieux",
+              "keywords": [
+                "etat des lieux",
+                "etat",
+                "lieux",
+                "immobilier"
+              ]
+            },
+            {
+              "name": "Expertise immobilière",
+              "keywords": [
+                "expertise immobiliere",
+                "expertise",
+                "immobiliere",
+                "immobilier"
+              ]
+            },
+            {
+              "name": "Photos immobilières",
+              "keywords": [
+                "photos immobilieres",
+                "photos",
+                "immobilieres",
+                "immobilier"
+              ]
+            },
+            {
+              "name": "Entretien logement",
+              "keywords": [
+                "entretien logement",
+                "entretien",
+                "logement",
+                "immobilier"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Architecture & études",
+          "services": [
+            {
+              "name": "Architecte",
+              "keywords": [
+                "architecte"
+              ]
+            },
+            {
+              "name": "Dessinateur bâtiment",
+              "keywords": [
+                "dessinateur batiment",
+                "dessinateur",
+                "batiment",
+                "architecte"
+              ]
+            },
+            {
+              "name": "Plan maison",
+              "keywords": [
+                "plan maison",
+                "plan",
+                "maison",
+                "architecte"
+              ]
+            },
+            {
+              "name": "Plan 2D",
+              "keywords": [
+                "plan 2d",
+                "plan",
+                "architecte"
+              ]
+            },
+            {
+              "name": "Plan 3D",
+              "keywords": [
+                "plan 3d",
+                "plan",
+                "architecte"
+              ]
+            },
+            {
+              "name": "Modélisation 3D",
+              "keywords": [
+                "modelisation 3d",
+                "modelisation",
+                "architecte"
+              ]
+            },
+            {
+              "name": "Métré",
+              "keywords": [
+                "metre",
+                "architecte"
+              ]
+            },
+            {
+              "name": "Topographe",
+              "keywords": [
+                "topographe",
+                "architecte"
+              ]
+            },
+            {
+              "name": "Géomètre",
+              "keywords": [
+                "geometre",
+                "architecte"
+              ]
+            },
+            {
+              "name": "Étude de sol",
+              "keywords": [
+                "etude de sol",
+                "etude",
+                "architecte"
+              ]
+            },
+            {
+              "name": "Génie civil",
+              "keywords": [
+                "genie civil",
+                "genie",
+                "civil",
+                "architecte"
+              ]
+            },
+            {
+              "name": "Bureau d'études",
+              "keywords": [
+                "bureau d etudes",
+                "bureau",
+                "etudes",
+                "architecte"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Agriculture, Pêche & Nature",
+      "subcategories": [
+        {
+          "subcategory": "Agriculture",
+          "services": [
+            {
+              "name": "Défrichage",
+              "keywords": [
+                "defrichage",
+                "agriculteur"
+              ]
+            },
+            {
+              "name": "Plantation",
+              "keywords": [
+                "plantation",
+                "agriculteur"
+              ]
+            },
+            {
+              "name": "Entretien plantation",
+              "keywords": [
+                "entretien plantation",
+                "entretien",
+                "plantation",
+                "agriculteur"
+              ]
+            },
+            {
+              "name": "Maraîchage",
+              "keywords": [
+                "maraichage",
+                "agriculteur"
+              ]
+            },
+            {
+              "name": "Jardin potager",
+              "keywords": [
+                "jardin potager",
+                "jardin",
+                "potager",
+                "agriculteur"
+              ]
+            },
+            {
+              "name": "Élevage",
+              "keywords": [
+                "elevage",
+                "agriculteur"
+              ]
+            },
+            {
+              "name": "Aviculture",
+              "keywords": [
+                "aviculture",
+                "agriculteur"
+              ]
+            },
+            {
+              "name": "Pisciculture",
+              "keywords": [
+                "pisciculture",
+                "agriculteur"
+              ]
+            },
+            {
+              "name": "Conseil agricole",
+              "keywords": [
+                "conseil agricole",
+                "conseil",
+                "agricole",
+                "agriculteur"
+              ]
+            },
+            {
+              "name": "Irrigation",
+              "keywords": [
+                "irrigation",
+                "agriculteur"
+              ]
+            },
+            {
+              "name": "Traitement cultures",
+              "keywords": [
+                "traitement cultures",
+                "traitement",
+                "cultures",
+                "agriculteur"
+              ]
+            },
+            {
+              "name": "Location matériel agricole",
+              "keywords": [
+                "location materiel agricole",
+                "location",
+                "materiel",
+                "agricole",
+                "agriculteur"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Pêche",
+          "services": [
+            {
+              "name": "Pêcheur",
+              "keywords": [
+                "pecheur"
+              ]
+            },
+            {
+              "name": "Livraison poisson",
+              "keywords": [
+                "livraison poisson",
+                "livraison",
+                "poisson",
+                "pecheur"
+              ]
+            },
+            {
+              "name": "Nettoyage poisson",
+              "keywords": [
+                "nettoyage poisson",
+                "nettoyage",
+                "poisson",
+                "pecheur"
+              ]
+            },
+            {
+              "name": "Fumage poisson",
+              "keywords": [
+                "fumage poisson",
+                "fumage",
+                "poisson",
+                "pecheur"
+              ]
+            },
+            {
+              "name": "Transport produits halieutiques",
+              "keywords": [
+                "transport produits halieutiques",
+                "transport",
+                "produits",
+                "halieutiques",
+                "pecheur"
+              ]
+            },
+            {
+              "name": "Matériel de pêche",
+              "keywords": [
+                "materiel de peche",
+                "materiel",
+                "peche",
+                "pecheur"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Animaux",
+          "services": [
+            {
+              "name": "Garde animaux",
+              "keywords": [
+                "garde animaux",
+                "garde",
+                "animaux"
+              ]
+            },
+            {
+              "name": "Promenade chien",
+              "keywords": [
+                "promenade chien",
+                "promenade",
+                "chien",
+                "animaux"
+              ]
+            },
+            {
+              "name": "Toilettage",
+              "keywords": [
+                "toilettage",
+                "animaux"
+              ]
+            },
+            {
+              "name": "Dressage",
+              "keywords": [
+                "dressage",
+                "animaux"
+              ]
+            },
+            {
+              "name": "Pension animaux",
+              "keywords": [
+                "pension animaux",
+                "pension",
+                "animaux"
+              ]
+            },
+            {
+              "name": "Transport animaux",
+              "keywords": [
+                "transport animaux",
+                "transport",
+                "animaux"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Loisirs & Services Divers",
+      "subcategories": [
+        {
+          "subcategory": "Tourisme & voyage",
+          "services": [
+            {
+              "name": "Guide touristique",
+              "keywords": [
+                "guide touristique",
+                "guide",
+                "touristique",
+                "tourisme"
+              ]
+            },
+            {
+              "name": "Guide local",
+              "keywords": [
+                "guide local",
+                "guide",
+                "local",
+                "tourisme"
+              ]
+            },
+            {
+              "name": "Chauffeur touristique",
+              "keywords": [
+                "chauffeur touristique",
+                "chauffeur",
+                "touristique",
+                "tourisme"
+              ]
+            },
+            {
+              "name": "Excursion",
+              "keywords": [
+                "excursion",
+                "tourisme"
+              ]
+            },
+            {
+              "name": "Organisation voyage",
+              "keywords": [
+                "organisation voyage",
+                "organisation",
+                "voyage",
+                "tourisme"
+              ]
+            },
+            {
+              "name": "Transfert aéroport",
+              "keywords": [
+                "transfert aeroport",
+                "transfert",
+                "aeroport",
+                "tourisme"
+              ]
+            },
+            {
+              "name": "Location véhicule",
+              "keywords": [
+                "location vehicule",
+                "location",
+                "vehicule",
+                "tourisme"
+              ]
+            },
+            {
+              "name": "Photographe touristique",
+              "keywords": [
+                "photographe touristique",
+                "photographe",
+                "touristique",
+                "tourisme"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Imprimerie & personnalisation",
+          "services": [
+            {
+              "name": "Impression documents",
+              "keywords": [
+                "impression documents",
+                "impression",
+                "documents",
+                "imprimerie"
+              ]
+            },
+            {
+              "name": "Affiches",
+              "keywords": [
+                "affiches",
+                "imprimerie"
+              ]
+            },
+            {
+              "name": "Flyers",
+              "keywords": [
+                "flyers",
+                "imprimerie"
+              ]
+            },
+            {
+              "name": "Banderoles",
+              "keywords": [
+                "banderoles",
+                "imprimerie"
+              ]
+            },
+            {
+              "name": "T-shirts personnalisés",
+              "keywords": [
+                "t shirts personnalises",
+                "shirts",
+                "personnalises",
+                "imprimerie"
+              ]
+            },
+            {
+              "name": "Casquettes",
+              "keywords": [
+                "casquettes",
+                "imprimerie"
+              ]
+            },
+            {
+              "name": "Mug",
+              "keywords": [
+                "mug",
+                "imprimerie"
+              ]
+            },
+            {
+              "name": "Stickers",
+              "keywords": [
+                "stickers",
+                "imprimerie"
+              ]
+            },
+            {
+              "name": "Enseignes",
+              "keywords": [
+                "enseignes",
+                "imprimerie"
+              ]
+            },
+            {
+              "name": "Signalétique",
+              "keywords": [
+                "signaletique",
+                "imprimerie"
+              ]
+            },
+            {
+              "name": "Tampons",
+              "keywords": [
+                "tampons",
+                "imprimerie"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Location de matériel",
+          "services": [
+            {
+              "name": "Location outils",
+              "keywords": [
+                "location outils",
+                "location",
+                "outils",
+                "location materiel"
+              ]
+            },
+            {
+              "name": "Perceuse",
+              "keywords": [
+                "perceuse",
+                "location materiel"
+              ]
+            },
+            {
+              "name": "Bétonnière",
+              "keywords": [
+                "betonniere",
+                "location materiel"
+              ]
+            },
+            {
+              "name": "Échelle",
+              "keywords": [
+                "echelle",
+                "location materiel"
+              ]
+            },
+            {
+              "name": "Groupe électrogène",
+              "keywords": [
+                "groupe electrogene",
+                "groupe",
+                "electrogene",
+                "location materiel"
+              ]
+            },
+            {
+              "name": "Sono",
+              "keywords": [
+                "sono",
+                "location materiel"
+              ]
+            },
+            {
+              "name": "Tente",
+              "keywords": [
+                "tente",
+                "location materiel"
+              ]
+            },
+            {
+              "name": "Tables",
+              "keywords": [
+                "tables",
+                "location materiel"
+              ]
+            },
+            {
+              "name": "Chaises",
+              "keywords": [
+                "chaises",
+                "location materiel"
+              ]
+            },
+            {
+              "name": "Vidéoprojecteur",
+              "keywords": [
+                "videoprojecteur",
+                "location materiel"
+              ]
+            },
+            {
+              "name": "Caméra",
+              "keywords": [
+                "camera",
+                "location materiel"
+              ]
+            },
+            {
+              "name": "Matériel événementiel",
+              "keywords": [
+                "materiel evenementiel",
+                "materiel",
+                "evenementiel",
+                "location materiel"
+              ]
+            },
+            {
+              "name": "Matériel chantier",
+              "keywords": [
+                "materiel chantier",
+                "materiel",
+                "chantier",
+                "location materiel"
+              ]
+            }
+          ]
+        },
+        {
+          "subcategory": "Services divers",
+          "services": [
+            {
+              "name": "Montage meuble",
+              "keywords": [
+                "montage meuble",
+                "montage",
+                "meuble",
+                "service divers"
+              ]
+            },
+            {
+              "name": "Pose TV murale",
+              "keywords": [
+                "pose tv murale",
+                "pose",
+                "murale",
+                "service divers"
+              ]
+            },
+            {
+              "name": "Installation rideaux",
+              "keywords": [
+                "installation rideaux",
+                "installation",
+                "rideaux",
+                "service divers"
+              ]
+            },
+            {
+              "name": "Courses",
+              "keywords": [
+                "courses",
+                "service divers"
+              ]
+            },
+            {
+              "name": "File d'attente",
+              "keywords": [
+                "file d attente",
+                "file",
+                "attente",
+                "service divers"
+              ]
+            },
+            {
+              "name": "Livraison",
+              "keywords": [
+                "livraison",
+                "service divers"
+              ]
+            },
+            {
+              "name": "Petit bricolage",
+              "keywords": [
+                "petit bricolage",
+                "petit",
+                "bricolage",
+                "service divers"
+              ]
+            },
+            {
+              "name": "Aide déménagement",
+              "keywords": [
+                "aide demenagement",
+                "aide",
+                "demenagement",
+                "service divers"
+              ]
+            },
+            {
+              "name": "Assemblage équipement",
+              "keywords": [
+                "assemblage equipement",
+                "assemblage",
+                "equipement",
+                "service divers"
+              ]
+            },
+            {
+              "name": "Nettoyage ponctuel",
+              "keywords": [
+                "nettoyage ponctuel",
+                "nettoyage",
+                "ponctuel",
+                "service divers"
+              ]
+            },
+            {
+              "name": "Autre service",
+              "keywords": [
+                "autre service",
+                "autre",
+                "service",
+                "service divers"
+              ]
+            },
+            {
+              "name": "Demande personnalisée",
+              "keywords": [
+                "demande personnalisee",
+                "demande",
+                "personnalisee",
+                "service divers"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

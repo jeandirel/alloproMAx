@@ -1,0 +1,20 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/process-deletions",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/marketplace-expire",
+      "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/marketplace-auto-complete",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/marketplace-reconcile",
+      "schedule": "0 6 * * *"
+    }
+  ]
+}
