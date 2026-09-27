@@ -93,6 +93,14 @@ export const payoutStatus: StatusMap = {
   echoue: { label: 'Échoué', tone: 'danger' },
 }
 
+export const ledgerEntryTypeLabel: Record<string, string> = {
+  platform_fee: 'Commission plateforme',
+  professional_payout: 'Versement professionnel',
+  refund: 'Remboursement',
+  contact_unlock_fee: 'Frais de déblocage de contact',
+  provider_fee_actual: 'Frais réel du fournisseur',
+}
+
 export function isTerminalPaymentAttemptStatus(status: string): boolean {
   return status === 'COMPLETED' || status === 'FAILED' || status === 'REJECTED'
 }
