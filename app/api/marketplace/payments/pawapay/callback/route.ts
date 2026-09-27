@@ -44,8 +44,9 @@ export async function POST(req: Request) {
     const raw = await req.text()
     if (raw.length > 16384) return new NextResponse(null, { status: 413, headers })
     const body = callback.parse(JSON.parse(raw))
-    const id = body.refundId || body.payoutId || body.depositId
-    if (!id || (body.refundId && body.payoutId)) return new NextResponse(null, { status: 400, headers })
+    const provided = [body.depositId, body.payoutId, body.refundId].filter((v): v is string => Boolean(v))
+    if (provided.length !== 1) return new NextResponse(null, { status: 400, headers })
+    const id = provided[0]
     const attempt = await prisma.paymentAttempt.findUnique({ where: { id } })
     if (!attempt) return new NextResponse(null, { status: 200, headers })
     if (attempt.contactUnlockId) {
