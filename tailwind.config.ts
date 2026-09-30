@@ -46,9 +46,16 @@ const config: Config = {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
         },
+        success: {
+          DEFAULT: 'hsl(var(--success))',
+          foreground: 'hsl(var(--success-foreground))',
+        },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
+        // Legacy literal palette — encore référencée par des pages pas
+        // encore migrées vers les tokens sémantiques ci-dessus. À retirer
+        // une fois la passe de migration page par page terminée.
         emerald: {
           dark: '#0B6E4F',
           DEFAULT: '#1A9E72',
@@ -59,7 +66,7 @@ const config: Config = {
           light: '#F7B84E',
           dark: '#D48F1A',
         },
-        night: '#1A2332',
+        night: '#18233A',
         anthracite: '#333F4D',
         chart: {
           '1': 'hsl(var(--chart-1))',
